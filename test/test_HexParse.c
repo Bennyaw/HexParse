@@ -12,34 +12,34 @@ void test_hexParser_check_for_colon_sign_return_true(void){
     TEST_ASSERT_TRUE(hexParser(&line));
 }
 
-void test_hexParser_given_byte_count_10_hex_convert_into_decimal(void)
+void test_getByteCount_given_byte_count_10_hex_convert_into_decimal(void)
 {
   char *line = ":10";
 
   TEST_ASSERT_EQUAL(16,getByteCount(&line));
 }
 
-void test_hexParser_given_byte_count_0B_hex_convert_into_decimal(void)
+void test_getByteCount_given_byte_count_0B_hex_convert_into_decimal(void)
 {
   char *line = ":0B";
 
   TEST_ASSERT_EQUAL(11,getByteCount(&line));
 }
 
-void test_hexParser_given_byte_count_20_hex_convert_into_decimal(void)
+void test_getByteCount_given_byte_count_20_hex_convert_into_decimal(void)
 {
   char *line = ":20";
 
   TEST_ASSERT_EQUAL(32,getByteCount(&line));
 }
-void test_hexParser_given_byte_count_00_hex_convert_into_decimal(void)
+void test_getByteCount_given_byte_count_00_hex_convert_into_decimal(void)
 {
   char *line = ":00";
 
   TEST_ASSERT_EQUAL(00,getByteCount(&line));
 }
 
-void test_hexParser_given_byte_count_1a_hex_convert_into_decimal(void)
+void test_getByteCount_given_byte_count_1a_hex_convert_into_decimal(void)
 {
   char *line = ":1a";
 
@@ -93,4 +93,11 @@ void test_extractRecordType_given_04(void)
   char *line = "04";
   char *recordTypeReturn = extractRecordType(line);
   TEST_ASSERT_EQUAL_STRING("04",recordTypeReturn);
+}
+
+void test_extractData_given_FFFF_without_checcsum_yet(void)
+{
+  char *line = ":02000004FFFF";
+  char *dataReturn = extractData(line);
+  TEST_ASSERT_EQUAL_STRING("FFFF",dataReturn);
 }

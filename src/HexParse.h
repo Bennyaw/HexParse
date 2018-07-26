@@ -6,5 +6,6 @@ int getByteCount(char **linePtr);
 int hexParser(char **linePtr);
 char *extractAddress (char *linePtr);
 char *extractRecordType(char *linePtr);
+char *extractData(char *linePtr);
 
 #endif // _HEXPARSE_H

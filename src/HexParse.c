@@ -89,3 +89,42 @@ char *extractRecordType(char *linePtr)
   recordType[i] = '\0';
   return recordType;
 }
+
+char *extractData(char *linePtr)
+{
+  int movePtr = 0;
+  int byteCount = 0;
+  int i= 0;
+  char *dataExtracted;
+  dataExtracted = malloc(byteCount*2);
+
+  if(hexParser(&linePtr))
+  {
+    byteCount = (getByteCount(&linePtr))*2;
+    for(movePtr = 0; movePtr < 6; movePtr++) //skip address and recordtype to get data
+    {
+      linePtr++;
+    }
+
+  }
+  else
+  {
+    printf("Error");
+  }
+
+  while(byteCount != 0){
+    while(isalpha(*linePtr) || isdigit(*linePtr))
+    {
+      dataExtracted[i] = *linePtr;
+      linePtr++;
+      byteCount--;
+      i++;
+    }
+    if(linePtr == '\0')
+    {
+      break;
+    }
+  }
+  dataExtracted[i] = '\0';
+  return dataExtracted;
+}
