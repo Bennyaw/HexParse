@@ -5,8 +5,37 @@
 #include <ctype.h>
 #include "HexParse.h"
 
+int openFile(void)
+{
+  FILE * fp;
 
-int hexParser(char **linePtr)
+  fp = fopen ("myfile.txt", "w+");
+  fprintf(fp, "%s %d", "we are in ", 2018);
+
+  fclose(fp);
+
+  return(0);
+}
+
+int readFile(void)
+{
+  FILE *fp;
+  int c;
+
+  fp = fopen("assemblerApp.hex","r");
+  while(1) {
+     c = fgetc(fp);
+     if( feof(fp) ) {
+        break ;
+     }
+     printf("%c", c);
+  }
+  fclose(fp);
+
+  return(0);
+}
+
+int checkColon(char **linePtr)
 {
   if(**linePtr == ':')
   {
@@ -98,7 +127,7 @@ char *extractData(char *linePtr)
   char *dataExtracted;
   dataExtracted = malloc(byteCount*2);
 
-  if(hexParser(&linePtr))
+  if(checkColon(&linePtr))
   {
     byteCount = (getByteCount(&linePtr))*2;
     for(movePtr = 0; movePtr < 6; movePtr++) //skip address and recordtype to get data
@@ -112,19 +141,21 @@ char *extractData(char *linePtr)
     printf("Error");
   }
 
-  while(byteCount != 0){
+
     while(isalpha(*linePtr) || isdigit(*linePtr))
     {
       dataExtracted[i] = *linePtr;
       linePtr++;
       byteCount--;
       i++;
+
+      if(byteCount == 0)
+      {
+        break;
+      }
     }
-    if(linePtr == '\0')
-    {
-      break;
-    }
-  }
+
+
   dataExtracted[i] = '\0';
   return dataExtracted;
 }

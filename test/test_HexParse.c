@@ -6,10 +6,20 @@ void setUp(void){}
 
 void tearDown(void){}
 
-void test_hexParser_check_for_colon_sign_return_true(void){
+void test_openFile()
+{
+  openFile();
+}
+
+void test_readFile(void)
+{
+  readFile();
+}
+
+void test_checkColon_check_for_colon_sign_return_true(void){
     char *line = ":";
 
-    TEST_ASSERT_TRUE(hexParser(&line));
+    TEST_ASSERT_TRUE(checkColon(&line));
 }
 
 void test_getByteCount_given_byte_count_10_hex_convert_into_decimal(void)
@@ -95,9 +105,17 @@ void test_extractRecordType_given_04(void)
   TEST_ASSERT_EQUAL_STRING("04",recordTypeReturn);
 }
 
-void test_extractData_given_FFFF_without_checcsum_yet(void)
+void test_extractData_given_FFFF_without_checksum_yet(void)
 {
   char *line = ":02000004FFFF";
   char *dataReturn = extractData(line);
   TEST_ASSERT_EQUAL_STRING("FFFF",dataReturn);
 }
+/*
+void test_extractData_given_FFFF_with_checksum(void)
+{
+  char *line = ":02000004FFFFFC";
+  char *checkSumReturn = extractCheckSum(line);
+  TEST_ASSERT_EQUAL_STRING("FFFF",checkSumReturn);
+}
+*/
