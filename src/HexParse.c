@@ -3,6 +3,8 @@
 #include <math.h>
 #include <malloc.h>
 #include <ctype.h>
+#include <stdint.h>
+#include <string.h>
 #include "HexParse.h"
 
 int openFile(void)
@@ -51,37 +53,21 @@ int getByteCount(char **linePtr)
 {
   int decimal = 0,count = 0;
   int base = 1;
-  int p = 1;
+  int power = 1;
 
   if((**linePtr) == ':') //check whetehr got colon sign
   {
     (*linePtr)++;
   }
-  else
+
+  while(count<2) // after colon sign
   {
-    return 0;
+    base = (int)pow((double)16,power);  //16^1
+    decimal = convertHexToDec(linePtr, decimal, power, base);
+    power--;  //move from power 1 to 0
+    count++;
   }
 
-  while(count<2) // after
-  {
-    if(**linePtr >= '0' && **linePtr <= '9')
-    {
-      base = (int)pow((double)16,p);  //16^1
-      decimal = decimal + (**linePtr - 48)*base;
-      count++;
-      p--;  //move from power 1 to 0
-      (*linePtr)++; //move to next digit
-    }
-    else if((toupper(**linePtr)) >= 'A' && (toupper(**linePtr)) <= 'F')
-    {
-      base = (int)pow((double)16,p);  //16^1
-      decimal = decimal + (toupper(**linePtr) - 55)*base;
-      count++;
-      p--;  //move from power 1 to 0
-      (*linePtr)++; //move to next hexdigit
-    }
-
-  }
   return decimal;
 }
 
@@ -142,20 +128,86 @@ char *extractData(char *linePtr)
   }
 
 
-    while(isalpha(*linePtr) || isdigit(*linePtr))
-    {
-      dataExtracted[i] = *linePtr;
-      linePtr++;
-      byteCount--;
-      i++;
+  while(isalpha(*linePtr) || isdigit(*linePtr))
+  {
+    dataExtracted[i] = *linePtr;
+    linePtr++;
+    byteCount--;
+    i++;
 
-      if(byteCount == 0)
-      {
-        break;
-      }
+    if(byteCount == 0)
+    {
+      break;
     }
+  }
 
 
   dataExtracted[i] = '\0';
   return dataExtracted;
+}
+/*
+int verifyHexLine(char **linePtr)
+{
+  uint16_t addData;
+  int sizeHexLine;
+
+  if(checkColon(linePtr))
+  {
+    while(**linePtr == ':')
+    {
+      (*linePtr)++;
+    }
+
+    //sizeHexLine = strlen(*linePtr);
+
+    while(**linePtr != ':')//loop until next hexline
+    {
+      if(**linePtr == '\0')
+      {
+        break;
+      }
+
+      while(countHexDigit != 0){
+        int countHexDigit = 2;//loop every two byte
+        if(**linePtr >= '0' && **linePtr <= '9')//convert to int from hex
+        {
+          base = (int)pow((double)16,p);  //16^1
+          decimal = decimal + (**linePtr - 48)*base;
+          countHexDigit++;
+          p--;  //move from power 1 to 0
+          (*linePtr)++; //move to next digit
+        }
+        else if((toupper(**linePtr)) >= 'A' && (toupper(**linePtr)) <= 'F')//convert to int from hex
+        {
+          base = (int)pow((double)16,p);  //16^1
+          decimal = decimal + (toupper(**linePtr) - 55)*base;
+          countHexDigit++;
+          p--;  //move from power 1 to 0
+          (*linePtr)++; //move to next hexdigit
+        }
+      }
+    }
+
+
+  }
+
+//  printf("%d\n",sizeHexLine );
+  return 0;
+}
+*/
+int convertHexToDec(char **linePtr, int decimal, int p, int base)
+{
+
+  if(**linePtr >= '0' && **linePtr <= '9')//convert to int from hex
+  {
+    decimal = decimal + (**linePtr - 48)*base;
+    (*linePtr)++; //move to next digit
+  }
+  else if((toupper(**linePtr)) >= 'A' && (toupper(**linePtr)) <= 'F')//convert to int from hex
+  {
+    decimal = decimal + (toupper(**linePtr) - 55)*base;
+    (*linePtr)++; //move to next hexdigit
+  }
+
+  return decimal;
 }

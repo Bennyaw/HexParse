@@ -24,34 +24,34 @@ void test_checkColon_check_for_colon_sign_return_true(void){
 
 void test_getByteCount_given_byte_count_10_hex_convert_into_decimal(void)
 {
-  char *line = ":10";
+  char *line = "10";
 
   TEST_ASSERT_EQUAL(16,getByteCount(&line));
 }
 
 void test_getByteCount_given_byte_count_0B_hex_convert_into_decimal(void)
 {
-  char *line = ":0B";
+  char *line = "0B";
 
   TEST_ASSERT_EQUAL(11,getByteCount(&line));
 }
 
 void test_getByteCount_given_byte_count_20_hex_convert_into_decimal(void)
 {
-  char *line = ":20";
+  char *line = "20";
 
   TEST_ASSERT_EQUAL(32,getByteCount(&line));
 }
 void test_getByteCount_given_byte_count_00_hex_convert_into_decimal(void)
 {
-  char *line = ":00";
+  char *line = "00";
 
   TEST_ASSERT_EQUAL(00,getByteCount(&line));
 }
 
 void test_getByteCount_given_byte_count_1a_hex_convert_into_decimal(void)
 {
-  char *line = ":1a";
+  char *line = "1a";
 
   TEST_ASSERT_EQUAL(26,getByteCount(&line));
 }
@@ -115,7 +115,7 @@ void test_extractData_given_FFFF_without_checksum_yet(void)
 void test_extractData_given_FFFF_with_checksum(void)
 {
   char *line = ":02000004FFFFFC";
-  char *checkSumReturn = extractCheckSum(line);
-  TEST_ASSERT_EQUAL_STRING("FFFF",checkSumReturn);
+
+  TEST_ASSERT_TRUE(verifyHexLine(&line));
 }
 */
