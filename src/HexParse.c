@@ -6,6 +6,40 @@
 #include <stdint.h>
 #include <string.h>
 #include "HexParse.h"
+#include "Error.h"
+#include "Exception.h"
+#include "CException.h"
+
+
+/* -----------------------RECORD TYPE---------------------
+*   00 - data
+*   01 - End Of FILE
+*   02 - Extended Segment Address
+*   03 - Start Segment Address
+*   04 - Extended Linear Address
+*   05 - Start Linear Address
+*----------------------------------------------------------*/
+
+
+/* ------------------------Hex Format---------------------
+*   :llaaaatt[dd...]cc
+* : is colone that starts every Intel HEX recordType
+*
+* ll is the record-length field that represents the number of data bytes (dd) in the record.
+*
+* aaaa is the address field that represents the starting address
+* for subsequent data in the record.
+*
+* tt is the field that represents the HEX record type, which may be one of the following:
+*
+* dd is a data field that represents one byte of data. A record may have multiple
+* data bytes. The number of data bytes in the record must match the number specified by the ll field.
+*
+* cc is the checksum field that represents the checksum of the record.
+* The checksum is calculated by summing the values of all hexadecimal digit pairs in the record
+* modulo 256 and taking the two's complement.
+* -------------------------------------------------------*/
+
 
 int openFile(void)
 {
@@ -24,7 +58,7 @@ int readFile(void)
   FILE *fp;
   int c;
 
-  fp = fopen("assemblerApp.hex","r");
+  fp = fopen("testfile.txt","r");
   while(1) {
      c = fgetc(fp);
      if( feof(fp) ) {
@@ -43,8 +77,9 @@ int checkColon(char **linePtr)
   {
     return 1;
   }
-  else if((**linePtr) == '\0')
+  else
   {
+    throwSimpleError(ERR_COLON_MISSING,"Error : ':' is missing");
     return 0;
   }
 }
@@ -79,7 +114,7 @@ char *extractAddress (char *linePtr)
   int i = 0;
 
   while(stepCount != 0){
-    address[i] = *linePtr;
+    address[i] = toupper(*linePtr);
     i++;
     linePtr++;
     stepCount--;
@@ -124,7 +159,7 @@ char *extractData(char *linePtr)
   }
   else
   {
-    printf("Error");
+    printf("In function extractData, checkColon fail.\n");
   }
 
 
@@ -145,11 +180,13 @@ char *extractData(char *linePtr)
   dataExtracted[i] = '\0';
   return dataExtracted;
 }
-/*
+
 int verifyHexLine(char **linePtr)
 {
-  uint16_t addData;
+  uint16_t getData = 0,addData = 0;
+  uint8_t  verifyData;
   int sizeHexLine;
+  int countHexDigit = 2;
 
   if(checkColon(linePtr))
   {
@@ -162,41 +199,44 @@ int verifyHexLine(char **linePtr)
 
     while(**linePtr != ':')//loop until next hexline
     {
-      if(**linePtr == '\0')
+      if(**linePtr == '\0')//check whether reach end of line
       {
         break;
       }
-
-      while(countHexDigit != 0){
-        int countHexDigit = 2;//loop every two byte
-        if(**linePtr >= '0' && **linePtr <= '9')//convert to int from hex
-        {
-          base = (int)pow((double)16,p);  //16^1
-          decimal = decimal + (**linePtr - 48)*base;
-          countHexDigit++;
-          p--;  //move from power 1 to 0
-          (*linePtr)++; //move to next digit
-        }
-        else if((toupper(**linePtr)) >= 'A' && (toupper(**linePtr)) <= 'F')//convert to int from hex
-        {
-          base = (int)pow((double)16,p);  //16^1
-          decimal = decimal + (toupper(**linePtr) - 55)*base;
-          countHexDigit++;
-          p--;  //move from power 1 to 0
-          (*linePtr)++; //move to next hexdigit
-        }
+      else
+      {
+        getData = getByteCount(linePtr);//get 2 byte count
+        addData += getData ; //keep adding untill last hex digit
       }
     }
 
+    verifyData = addData & 0xff;//if not zero then is error data
+    printf("verifyData(non-zero means error data) : %u\n", verifyData);//checking hex digit whether is 00
 
+    if(verifyData == 0)
+    {
+      return 1;
+    }
+    else
+    {
+      throwError(ERR_DATA_CORRUPTED,"Error : Data corrupted by %d in decimal",verifyData);
+      return 0;
+    }
+
+  }
+  else
+  {
+    printf("In function verifyHexLine, checkColon fail.\n");
+    return 0;
   }
 
 //  printf("%d\n",sizeHexLine );
-  return 0;
+  return addData;
 }
-*/
+
 int convertHexToDec(char **linePtr, int decimal, int p, int base)
 {
+  char errorChar;
 
   if(**linePtr >= '0' && **linePtr <= '9')//convert to int from hex
   {
@@ -207,6 +247,12 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
   {
     decimal = decimal + (toupper(**linePtr) - 55)*base;
     (*linePtr)++; //move to next hexdigit
+  }
+  else
+  {
+    errorChar = (**linePtr - 0);
+    printf("errorChar : %c\n", errorChar);
+    throwError(ERR_UNREGCONISED_DATA,"Error : Unregconised data '%c' found in the line.",errorChar);
   }
 
   return decimal;
