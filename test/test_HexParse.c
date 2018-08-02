@@ -7,6 +7,10 @@
 #include "Exception.h"
 #include "CException.h"
 
+#define k 1024
+
+int *baseMemory = malloc(128*k);
+
 void setUp(void){}
 
 void tearDown(void){}
@@ -70,7 +74,7 @@ void test_extractRecordType_given_00(void)
   int recordTypeReturn = extractRecordType(line);
   TEST_ASSERT_EQUAL(5,recordTypeReturn);
 }
-
+/*
 void test_extractData_given_FFFF_return_true(void)
 {
   char *line = "FF";
@@ -79,17 +83,14 @@ void test_extractData_given_FFFF_return_true(void)
 
   TEST_ASSERT_EQUAL(0xFF,dataReturn);
 }
-
+*/
 void test_extractData_given_FF3C_and_extract_and_locate_properly_in_memory(void)
 {
-  int memory_test[] = {0};
+  int *memory_test;
   char *line = "FF3C";
   int byteCount = 2;
 
-  for(int i = 0; i < byteCount; i++)
-  {
-    memory_test[i] = extractData(line,byteCount);
-  }
+  memory_test = extractData(line,byteCount);
 
   TEST_ASSERT_EQUAL(0xFF,memory_test[0]);
   TEST_ASSERT_EQUAL(0x3C,memory_test[1]);
@@ -152,6 +153,22 @@ void test_verifyHexLine_with_space_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
+void test_verifyHexLine_without_colon_and_throw_ERR_COLON_MISSING(void)
+{
+  CEXCEPTION_T e;
+  char *line = "1001000021460360121470136007EFE09D2190140";
+
+  Try{
+    verifyHexLine(&line);
+    TEST_FAIL_MESSAGE("Expect ERR_UNKNOWN_DATA. But no exception thrown.");
+  }
+  Catch(e){
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_COLON_MISSING, e->errorCode);
+    freeError(e);
+  }
+}
+
 void test_extractRecordType_with_56_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
 {
   CEXCEPTION_T e;
@@ -199,11 +216,11 @@ void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
     freeError(e);
   }
 }
-/*
+
 void test_interpretHexLine(void)
 {
+
   char *line = ":0B0010006164647265737320676170A7";
 
   hexParse(line);
 }
-*/

@@ -12,6 +12,7 @@
 
 #define k 1024
 
+int *memory;
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
 *   01 - End Of FILE
@@ -71,7 +72,8 @@ int readFile(void)
 
   return(0);
 }
-//---------------------------------------------------
+//----------------------------------------------------------
+
 //-------------functions for analyzing hex line-------------
 int checkColon(char **linePtr)
 {
@@ -153,43 +155,35 @@ int extractRecordType(char *linePtr)
 }
 
 
-int extractData(char *linePtr,int size)
+int *extractData(char *linePtr,int size)
 {
-  int decimal = 0,count = 0;
-  int base = 1;
-  int power = 1;
-  int data = 0;
-  /*
-  int movePtr = 0;
-  int byteCount = (size) * 2;
-  int i= 0;
-  char *dataExtracted;
-  dataExtracted = malloc(byteCount*2);
-  */
-  while(count<2)
-  {
-    base = (int)pow((double)16,power);  //16^3
-    data = convertHexToDec(&linePtr, data, power, base);
-    power--;  //decrement power
-    count++;
-  }
-  /*
-  while(isalpha(*linePtr) || isdigit(*linePtr))//start to extract data
-  {
-    dataExtracted[i] = *linePtr;
-    linePtr++;
-    byteCount--;
-    i++;
+  int *memoryLoading = malloc(size) ;
+  int byteCount = size;
+  int i = 0;
 
-    if(byteCount == 0)
+  while(byteCount!=0)
+  {
+    int count = 0;
+    int base = 1;
+    int power = 1;
+    int data = 0;
+
+    while(count<2)
     {
-      break;
+      base = (int)pow((double)16,power);  //16^3
+      data = convertHexToDec(&linePtr, data, power, base);
+      power--;  //decrement power
+      count++;
     }
+
+    memory_test[i] = data;
+    i++;
+    byteCount--;
   }
 
-  dataExtracted[i] = '\0';
-  */
-  return data;
+  memoryLoading[i] = '\0';
+
+  return memoryLoading;
 }
 
 int verifyHexLine(char **linePtr)
@@ -262,13 +256,13 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
 
   return decimal;
 }
-/*
+
 //---------------------main function--------------------------
 int hexParse(char *linePtr)
 {
   char *ptrForVerify = linePtr;
-  char getAddress;
-  char recordType;
+  int getAddress = 0;
+  int recordType = 0;
   int byteCount = 0;
 
   if (verifyHexLine(&ptrForVerify))
@@ -291,13 +285,10 @@ int hexParse(char *linePtr)
   }
 }
 
-void interpretHexLine(char *linePtr, char *dataAddress, int size, char *recordType)
+void interpretHexLine(char *linePtr, int dataAddress, int byteCount, int *recordType)
 {
-  int memory[128*k];
-
-
   switch(recordType){
-    case '00': memory[]= extractData(linePtr,size);
+    case '00': memory= extractData(linePtr,byteCount);
     case '01':
     case '02':
     case '03':
@@ -312,4 +303,3 @@ void interpretHexLine(char *linePtr, char *dataAddress, int size, char *recordTy
 
 
 }
-*/
