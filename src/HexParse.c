@@ -10,6 +10,7 @@
 #include "Exception.h"
 #include "CException.h"
 
+#define k 1024
 
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
@@ -40,7 +41,7 @@
 * modulo 256 and taking the two's complement.
 * -------------------------------------------------------*/
 
-
+//--------testing open file-------------
 int openFile(void)
 {
   FILE * fp;
@@ -70,7 +71,8 @@ int readFile(void)
 
   return(0);
 }
-
+//---------------------------------------------------
+//-------------functions for analyzing hex line-------------
 int checkColon(char **linePtr)
 {
   if(**linePtr == ':')
@@ -90,11 +92,6 @@ int getByteCount(char **linePtr)
   int base = 1;
   int power = 1;
 
-  if((**linePtr) == ':') //check whetehr got colon sign
-  {
-    (*linePtr)++;
-  }
-
   while(count<2) // after colon sign
   {
     base = (int)pow((double)16,power);  //16^1
@@ -106,64 +103,78 @@ int getByteCount(char **linePtr)
   return decimal;
 }
 
-char *extractAddress (char *linePtr)
+int extractAddress (char *linePtr)
 {
-  int stepCount = 4;
-  char *address;
-  address = malloc(4);
-  int i = 0;
+  int decimal = 0,count = 0;
+  int base = 1;
+  int power = 3;
+  int intaddress = 0;
 
-  while(stepCount != 0){
-    address[i] = toupper(*linePtr);
-    i++;
-    linePtr++;
-    stepCount--;
-  }
-  address[i] = '\0';
-  return address;
-}
-
-char *extractRecordType(char *linePtr)
-{
-  int stepCount = 2;
-  char *recordType;
-  recordType = malloc(2);
-  int i = 0;
-
-  while(stepCount!= 0){
-    recordType[i] = *linePtr;
-    i++;
-    linePtr++;
-    stepCount--;
-  }
-  recordType[i] = '\0';
-  return recordType;
-}
-
-char *extractData(char *linePtr)
-{
-  int movePtr = 0;
-  int byteCount = 0;
-  int i= 0;
-  char *dataExtracted;
-  dataExtracted = malloc(byteCount*2);
-
-  if(checkColon(&linePtr))
+  while(count<4) // after colon sign
   {
-    byteCount = (getByteCount(&linePtr))*2;
-    for(movePtr = 0; movePtr < 6; movePtr++) //skip address and recordtype to get data
+    base = (int)pow((double)16,power);  //16^3
+    intaddress = convertHexToDec(&linePtr, intaddress, power, base);
+    power--;  //decrement power
+    count++;
+  }
+  return intaddress;
+}
+
+int extractRecordType(char *linePtr)
+{
+  int decimal = 0,count = 0;
+  int base = 1;
+  int power = 1;
+  int intRecordType = 0;
+  int errorFlag = 0;
+
+  while(count<2){
+
+    if(*linePtr <'0' || *linePtr >'5')//check if is in 0-5
     {
-      linePtr++;
+      errorFlag = 1;
     }
 
+    base = (int)pow((double)16,power);  //16^3
+    intRecordType = convertHexToDec(&linePtr, intRecordType, power, base);
+    power--;  //decrement power
+    count++;
+  }
+
+  if(errorFlag == 1)
+  {
+    throwError(ERR_UNKNOWN_RECORD_TYPE,"Error : Unknown recordtype digit '%x' found in the line.",intRecordType);
   }
   else
   {
-    printf("In function extractData, checkColon fail.\n");
+    return intRecordType;
   }
 
+}
 
-  while(isalpha(*linePtr) || isdigit(*linePtr))
+
+int extractData(char *linePtr,int size)
+{
+  int decimal = 0,count = 0;
+  int base = 1;
+  int power = 1;
+  int data = 0;
+  /*
+  int movePtr = 0;
+  int byteCount = (size) * 2;
+  int i= 0;
+  char *dataExtracted;
+  dataExtracted = malloc(byteCount*2);
+  */
+  while(count<2)
+  {
+    base = (int)pow((double)16,power);  //16^3
+    data = convertHexToDec(&linePtr, data, power, base);
+    power--;  //decrement power
+    count++;
+  }
+  /*
+  while(isalpha(*linePtr) || isdigit(*linePtr))//start to extract data
   {
     dataExtracted[i] = *linePtr;
     linePtr++;
@@ -176,9 +187,9 @@ char *extractData(char *linePtr)
     }
   }
 
-
   dataExtracted[i] = '\0';
-  return dataExtracted;
+  */
+  return data;
 }
 
 int verifyHexLine(char **linePtr)
@@ -195,8 +206,6 @@ int verifyHexLine(char **linePtr)
       (*linePtr)++;
     }
 
-    //sizeHexLine = strlen(*linePtr);
-
     while(**linePtr != ':')//loop until next hexline
     {
       if(**linePtr == '\0')//check whether reach end of line
@@ -211,7 +220,7 @@ int verifyHexLine(char **linePtr)
     }
 
     verifyData = addData & 0xff;//if not zero then is error data
-    printf("verifyData(non-zero means error data) : %u\n", verifyData);//checking hex digit whether is 00
+    //printf("verifyData(non-zero means error data) : %u\n", verifyData);//checking hex digit whether is 00
 
     if(verifyData == 0)
     {
@@ -229,9 +238,6 @@ int verifyHexLine(char **linePtr)
     printf("In function verifyHexLine, checkColon fail.\n");
     return 0;
   }
-
-//  printf("%d\n",sizeHexLine );
-  return addData;
 }
 
 int convertHexToDec(char **linePtr, int decimal, int p, int base)
@@ -250,10 +256,60 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
   }
   else
   {
-    errorChar = (**linePtr - 0);
-    printf("errorChar : %c\n", errorChar);
-    throwError(ERR_UNREGCONISED_DATA,"Error : Unregconised data '%c' found in the line.",errorChar);
+    //printf("errorChar : %c\n", **linePtr);
+    throwError(ERR_UNKNOWN_DATA,"Error : Unknown data '%c' found in the line.",**linePtr);
   }
 
   return decimal;
 }
+/*
+//---------------------main function--------------------------
+int hexParse(char *linePtr)
+{
+  char *ptrForVerify = linePtr;
+  char getAddress;
+  char recordType;
+  int byteCount = 0;
+
+  if (verifyHexLine(&ptrForVerify))
+  {
+    while(*linePtr == ':')
+    {
+      linePtr = linePtr + 2;//move pointer to address
+    }
+
+    byteCount = getByteCount(&linePtr);//get size of data
+    getAddress = extractAddress(linePtr);
+    recordType = extractRecordType(linePtr);//error thrown in the funciton
+
+    interpretHexLine(linePtr,getAddress,byteCount,recordType);
+
+  }
+  else
+  {
+    return 0;//error thrown inside verifyHexLine function
+  }
+}
+
+void interpretHexLine(char *linePtr, char *dataAddress, int size, char *recordType)
+{
+  int memory[128*k];
+
+
+  switch(recordType){
+    case '00': memory[]= extractData(linePtr,size);
+    case '01':
+    case '02':
+    case '03':
+    case '04':
+    case '05':
+
+    default:
+
+
+
+  }
+
+
+}
+*/

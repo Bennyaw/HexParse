@@ -5,9 +5,9 @@ int readFile(void);
 int openFile(void);
 int getByteCount(char **linePtr);
 int checkColon(char **linePtr);
-char *extractAddress (char *linePtr);
-char *extractRecordType(char *linePtr);
-char *extractData(char *linePtr);
+int extractAddress (char *linePtr);
+int extractRecordType(char *linePtr);
+int extractData(char *linePtr,int size);
 int verifyHexLine(char **linePtr);
 int convertHexToDec(char **linePtr, int decimal, int p, int base);
 
