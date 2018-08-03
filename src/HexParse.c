@@ -55,22 +55,17 @@ int openFile(void)
   return(0);
 }
 
-int readFile(void)
+char *readFile(FILE *fileLocation)
 {
-  FILE *fp;
-  int c;
-
-  fp = fopen("testfile.txt","r");
-  while(1) {
-     c = fgetc(fp);
-     if( feof(fp) ) {
-        break ;
-     }
-     printf("%c", c);
-  }
-  fclose(fp);
-
-  return(0);
+  int hexLinelength;
+  char *hexLine = malloc(k);
+  fgets (hexLine, k, fileLocation);
+  hexLinelength = strlen(hexLine);
+  hexLine[hexLinelength-1] = '\0';
+  printf("hexLine[%d] : %c\n",43,hexLine[43] );
+  printf("hexLinelength : %d\n",hexLinelength );
+  printf("In readFile function : %s", hexLine);
+  return hexLine;
 }
 //----------------------------------------------------------
 
@@ -176,7 +171,7 @@ int *extractData(char *linePtr,int size)
       count++;
     }
 
-    memory_test[i] = data;
+    memoryLoading[i] = data;
     i++;
     byteCount--;
   }
@@ -256,7 +251,7 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
 
   return decimal;
 }
-
+/*
 //---------------------main function--------------------------
 int hexParse(char *linePtr)
 {
@@ -288,7 +283,7 @@ int hexParse(char *linePtr)
 void interpretHexLine(char *linePtr, int dataAddress, int byteCount, int *recordType)
 {
   switch(recordType){
-    case '00': memory= extractData(linePtr,byteCount);
+    case '00': memory = extractData(linePtr,byteCount);
     case '01':
     case '02':
     case '03':
@@ -303,3 +298,4 @@ void interpretHexLine(char *linePtr, int dataAddress, int byteCount, int *record
 
 
 }
+*/

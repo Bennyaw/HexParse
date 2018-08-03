@@ -9,7 +9,7 @@
 
 #define k 1024
 
-int *baseMemory = malloc(128*k);
+//int *baseMemory = malloc(128*k);
 
 void setUp(void){}
 
@@ -22,7 +22,26 @@ void test_openFile()
 
 void test_readFile(void)
 {
-  readFile();
+  /*--------------exampleHex.hex----------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:10C010006C6C7920676F207468726F756768206137
+   *:10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:04C040007696E673FF
+   *:00000001FF
+   */
+
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("exampleHex.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  hexLineRead = readFile(fp);
+  printf("In test function : %s", hexLineRead);
+  TEST_ASSERT_EQUAL_STRING(":10C00000576F77212044696420796F7520726561CC",hexLineRead);
 }
 /*------------test for code working properly-----------------*/
 
@@ -217,10 +236,7 @@ void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void test_interpretHexLine(void)
+int test_interpretHexLine(void)
 {
 
-  char *line = ":0B0010006164647265737320676170A7";
-
-  hexParse(line);
 }

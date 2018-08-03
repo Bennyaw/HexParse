@@ -1,7 +1,7 @@
 #ifndef _HEXPARSE_H
 #define _HEXPARSE_H
 
-int readFile(void);
+char *readFile(FILE *fileLocation);
 int openFile(void);
 int getByteCount(char **linePtr);
 int checkColon(char **linePtr);
