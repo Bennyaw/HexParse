@@ -219,8 +219,9 @@ void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
 
 void test_interpretHexLine(void)
 {
-
   char *line = ":0B0010006164647265737320676170A7";
 
-  hexParse(line);
+  baseMemory = hexParse(line);
+  TEST_ASSERT_EQUAL
+
 }

@@ -12,7 +12,7 @@
 
 #define k 1024
 
-int *memory;
+int *baseMemory = malloc(128*k);
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
 *   01 - End Of FILE
@@ -157,7 +157,7 @@ int extractRecordType(char *linePtr)
 
 int *extractData(char *linePtr,int size)
 {
-  int *memoryLoading = malloc(size) ;
+  int *memoryLoading = malloc(size);
   int byteCount = size;
   int i = 0;
 
@@ -257,6 +257,10 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
   return decimal;
 }
 
+void loadDataToMemory(int address, int data)
+{
+  
+}
 //---------------------main function--------------------------
 int hexParse(char *linePtr)
 {
@@ -278,6 +282,7 @@ int hexParse(char *linePtr)
 
     interpretHexLine(linePtr,getAddress,byteCount,recordType);
 
+    return baseMemory;
   }
   else
   {
@@ -287,17 +292,21 @@ int hexParse(char *linePtr)
 
 void interpretHexLine(char *linePtr, int dataAddress, int byteCount, int *recordType)
 {
+  int *dataMemory;
+
   switch(recordType){
-    case '00': memory= extractData(linePtr,byteCount);
-    case '01':
-    case '02':
-    case '03':
-    case '04':
-    case '05':
+    case '00':  dataMemory = extractData(linePtr,byteCount);
+                while(byteCount != 0)
+                {
+                  baseMemory[dataAddress] =  dataMemory[i];//load all data to base memory
+                  byteCount--;
+                  dataAddress++;
+                  i++;
+                }
 
-    default:
 
 
+    default: return 0;
 
   }
 
