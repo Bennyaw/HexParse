@@ -11,7 +11,7 @@
 #include "CException.h"
 
 #define k 1024
-uint8_t dataMemory[k*k];//1024*1024
+uint8_t dataMemory[256*k];//1024*1024
 //int *baseMemory = malloc(128*k);
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
@@ -104,7 +104,7 @@ int getByteCount(char **linePtr)
   return decimal;
 }
 
-int extractAddress (char *linePtr)
+int extractAddress (char **linePtr)
 {
   int decimal = 0,count = 0;
   int base = 1;
@@ -114,14 +114,14 @@ int extractAddress (char *linePtr)
   while(count<4) // after colon sign
   {
     base = (int)pow((double)16,power);  //16^3
-    intaddress = convertHexToDec(&linePtr, intaddress, power, base);
+    intaddress = convertHexToDec(linePtr, intaddress, power, base);
     power--;  //decrement power
     count++;
   }
   return intaddress;
 }
 
-int extractRecordType(char *linePtr)
+int extractRecordType(char **linePtr)
 {
   int decimal = 0,count = 0;
   int base = 1;
@@ -131,13 +131,13 @@ int extractRecordType(char *linePtr)
 
   while(count<2){
 
-    if(*linePtr <'0' || *linePtr >'5')//check if is in 0-5
+    if(**linePtr <'0' || **linePtr >'5')//check if is in 0-5
     {
       errorFlag = 1;
     }
 
     base = (int)pow((double)16,power);  //16^3
-    intRecordType = convertHexToDec(&linePtr, intRecordType, power, base);
+    intRecordType = convertHexToDec(linePtr, intRecordType, power, base);
     power--;  //decrement power
     count++;
   }
@@ -174,9 +174,11 @@ void extractData(char *linePtr,HexRecordStructure HexRecordStructure)
       count++;
     }
 
-    dataMemory[HexRecordStructure.address] = data;
+    dataMemory[HexRecordStructure.address] = data;//load data in to memory
+    printf("dataMemory[%x] = %x\n",HexRecordStructure.address,data );
     HexRecordStructure.address++;
     byteCount--;
+
   }
 
 }
@@ -263,12 +265,12 @@ int hexParse(char *linePtr)
   {
     while(*linePtr == ':')
     {
-      linePtr = linePtr + 2;//move pointer to address
+      linePtr++;//move pointer to address
     }
 
     HexRecordStructure.byteCount = getByteCount(&linePtr);//get size of data
-    HexRecordStructure.address = extractAddress(linePtr);
-    HexRecordStructure.recordType = extractRecordType(linePtr);//error thrown in the funciton
+    HexRecordStructure.address = extractAddress(&linePtr);
+    HexRecordStructure.recordType = extractRecordType(&linePtr);//error thrown in the funciton
 
     interpretHexLine(linePtr,HexRecordStructure);
 

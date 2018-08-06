@@ -19,7 +19,8 @@ void test_openFile()
   openFile();
 }
 */
-void test_readFile(void)
+
+void xtest_readFile(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
@@ -43,7 +44,7 @@ void test_readFile(void)
   TEST_ASSERT_EQUAL_STRING(":10C00000576F77212044696420796F7520726561CC",hexLineRead);
 }
 
-void test_readFile_read_3rd_hex_line_from_hex_file(void)
+void xtest_readFile_read_3rd_hex_line_from_hex_file(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
@@ -70,7 +71,7 @@ void test_readFile_read_3rd_hex_line_from_hex_file(void)
   TEST_ASSERT_EQUAL_STRING(":10C020006C6C20746869732074726F75626C652023",hexLineRead);
 }
 
-void test_readFile_read_every_hex_line_from_hex_file(void)
+void xtest_readFile_read_every_hex_line_from_hex_file(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
@@ -97,49 +98,49 @@ void test_readFile_read_every_hex_line_from_hex_file(void)
 
 /*------------test for code working properly-----------------*/
 
-void test_checkColon_check_for_colon_sign_return_true(void){
+void xtest_checkColon_check_for_colon_sign_return_true(void){
     char *line = ":";
 
     TEST_ASSERT_TRUE(checkColon(&line));
 }
 
 
-void test_getByteCount_given_byte_count_10_hex_convert_into_decimal(void)
+void xtest_getByteCount_given_byte_count_10_hex_convert_into_decimal(void)
 {
   char *line = "10";
 
   TEST_ASSERT_EQUAL(16,getByteCount(&line));
 }
 
-void test_getByteCount_given_byte_count_1a_hex_convert_into_decimal(void)
+void xtest_getByteCount_given_byte_count_1a_hex_convert_into_decimal(void)
 {
   char *line = "1a";
 
   TEST_ASSERT_EQUAL(26,getByteCount(&line));
 }
 
-void test_getByteCount_given_byte_count_0B_hex_convert_into_decimal(void)
+void xtest_getByteCount_given_byte_count_0B_hex_convert_into_decimal(void)
 {
   char *line = "0B";
 
   TEST_ASSERT_EQUAL(11,getByteCount(&line));
 }
 
-void test_extractAddress_given_000A(void)
+void xtest_extractAddress_given_000A(void)
 {
   char *line = "000A";
   uint16_t addressReturn = extractAddress(line);
   TEST_ASSERT_EQUAL(0x000A,extractAddress(line));
 }
 
-void test_extractAddress_given_ffff_return_cap_letter(void)
+void xtest_extractAddress_given_ffff_return_cap_letter(void)
 {
   char *line = "ffff";
   uint16_t addressReturn = extractAddress(line);
   TEST_ASSERT_EQUAL(0xFFFF,addressReturn);
 }
 
-void test_extractRecordType_given_00(void)
+void xtest_extractRecordType_given_00(void)
 {
   char *line = "05";
   int recordTypeReturn = extractRecordType(line);
@@ -176,7 +177,7 @@ void test_verifyHexLine_with_16_byte_data_return_true(void)
 */
 /*----------------------test with exception-----------------------*/
 
-void test_checkColon_without_colon_sign_and_throw_ERR_COLON_MISSING(void)
+void xtest_checkColon_without_colon_sign_and_throw_ERR_COLON_MISSING(void)
 {
   CEXCEPTION_T e;
   char *line = "02000004FFFFFC";
@@ -192,7 +193,7 @@ void test_checkColon_without_colon_sign_and_throw_ERR_COLON_MISSING(void)
   }
 }
 
-void test_verifyHexLine_with_single_byte_data_error_and_throw_ERR_DATA_CORRUPTED(void)
+void xtest_verifyHexLine_with_single_byte_data_error_and_throw_ERR_DATA_CORRUPTED(void)
 {
   CEXCEPTION_T e;
   char *line = ":10010000214601360121470136007EFE09E2190140";
@@ -208,7 +209,7 @@ void test_verifyHexLine_with_single_byte_data_error_and_throw_ERR_DATA_CORRUPTED
   }
 }
 
-void test_verifyHexLine_with_space_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
+void xtest_verifyHexLine_with_space_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
 {
   CEXCEPTION_T e;
   char *line = ":1001000021460 360121470136007EFE09D2190140";
@@ -224,7 +225,7 @@ void test_verifyHexLine_with_space_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void test_verifyHexLine_without_colon_and_throw_ERR_COLON_MISSING(void)
+void xtest_verifyHexLine_without_colon_and_throw_ERR_COLON_MISSING(void)
 {
   CEXCEPTION_T e;
   char *line = "1001000021460360121470136007EFE09D2190140";
@@ -240,7 +241,7 @@ void test_verifyHexLine_without_colon_and_throw_ERR_COLON_MISSING(void)
   }
 }
 
-void test_extractRecordType_with_56_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
+void xtest_extractRecordType_with_56_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
 {
   CEXCEPTION_T e;
   char *line = "56";
@@ -256,7 +257,7 @@ void test_extractRecordType_with_56_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
   }
 }
 
-void test_extractAddress_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
+void xtest_extractAddress_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
 {
   CEXCEPTION_T e;
   char *line = "000Z";
@@ -272,7 +273,7 @@ void test_extractAddress_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
+void xtest_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
 {
   CEXCEPTION_T e;
   char *line = "1P";
@@ -288,7 +289,7 @@ void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-int test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
+void test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561C(P)
@@ -308,6 +309,7 @@ int test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
   }
   Try{
   hexLineRead = readFile(fp);
+  TEST_ASSERT_TRUE(hexParse(hexLineRead));
   TEST_FAIL_MESSAGE("Expect ERR_UNKNOWN_DATA. But no exception thrown.");
   }
   Catch(e)
@@ -318,7 +320,7 @@ int test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-int test_hexParse_read_1st_hex_line_from_file_and_return_true(void)
+void test_hexParse_read_1st_hex_line_from_file_and_return_true(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
