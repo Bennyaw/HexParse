@@ -11,8 +11,8 @@
 #include "CException.h"
 
 #define k 1024
-
-int *baseMemory = malloc(128*k);
+uint8_t dataMemory[k*k];//1024*1024
+//int *baseMemory = malloc(128*k);
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
 *   01 - End Of FILE
@@ -55,22 +55,21 @@ int openFile(void)
   return(0);
 }
 
-int readFile(void)
+char *readFile(FILE *fileLocation)
 {
-  FILE *fp;
-  int c;
-
-  fp = fopen("testfile.txt","r");
-  while(1) {
-     c = fgetc(fp);
-     if( feof(fp) ) {
-        break ;
-     }
-     printf("%c", c);
+  int hexLinelength;
+  char *hexLine = malloc(k);
+  if(fgets (hexLine, k, fileLocation) != NULL){
+    hexLinelength = strlen(hexLine);
+    hexLine[hexLinelength-1] = '\0';
   }
-  fclose(fp);
-
-  return(0);
+  else{
+    return NULL;
+  }
+  //printf("hexLine[%d] : %c\n",43,hexLine[43] );
+  //printf("hexLinelength : %d\n",hexLinelength );
+  //printf("In readFile function : %s\n", hexLine);
+  return hexLine;
 }
 //----------------------------------------------------------
 
@@ -155,11 +154,10 @@ int extractRecordType(char *linePtr)
 }
 
 
-int *extractData(char *linePtr,int size)
+void extractData(char *linePtr,HexRecordStructure HexRecordStructure)
 {
-  int *memoryLoading = malloc(size);
-  int byteCount = size;
-  int i = 0;
+
+  int byteCount = HexRecordStructure.byteCount;//for loading every two bytes in to memory
 
   while(byteCount!=0)
   {
@@ -176,22 +174,17 @@ int *extractData(char *linePtr,int size)
       count++;
     }
 
-    memory_test[i] = data;
-    i++;
+    dataMemory[HexRecordStructure.address] = data;
+    HexRecordStructure.address++;
     byteCount--;
   }
 
-  memoryLoading[i] = '\0';
-
-  return memoryLoading;
 }
 
 int verifyHexLine(char **linePtr)
 {
   uint16_t getData = 0,addData = 0;
   uint8_t  verifyData;
-  int sizeHexLine;
-  int countHexDigit = 2;
 
   if(checkColon(linePtr))
   {
@@ -257,13 +250,10 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
   return decimal;
 }
 
-void loadDataToMemory(int address, int data)
-{
-  
-}
 //---------------------main function--------------------------
 int hexParse(char *linePtr)
 {
+  HexRecordStructure HexRecordStructure;
   char *ptrForVerify = linePtr;
   int getAddress = 0;
   int recordType = 0;
@@ -276,13 +266,13 @@ int hexParse(char *linePtr)
       linePtr = linePtr + 2;//move pointer to address
     }
 
-    byteCount = getByteCount(&linePtr);//get size of data
-    getAddress = extractAddress(linePtr);
-    recordType = extractRecordType(linePtr);//error thrown in the funciton
+    HexRecordStructure.byteCount = getByteCount(&linePtr);//get size of data
+    HexRecordStructure.address = extractAddress(linePtr);
+    HexRecordStructure.recordType = extractRecordType(linePtr);//error thrown in the funciton
 
-    interpretHexLine(linePtr,getAddress,byteCount,recordType);
+    interpretHexLine(linePtr,HexRecordStructure);
 
-    return baseMemory;
+    return 1;
   }
   else
   {
@@ -290,25 +280,20 @@ int hexParse(char *linePtr)
   }
 }
 
-void interpretHexLine(char *linePtr, int dataAddress, int byteCount, int *recordType)
+void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
 {
-  int *dataMemory;
 
-  switch(recordType){
-    case '00':  dataMemory = extractData(linePtr,byteCount);
-                while(byteCount != 0)
-                {
-                  baseMemory[dataAddress] =  dataMemory[i];//load all data to base memory
-                  byteCount--;
-                  dataAddress++;
-                  i++;
-                }
-
-
-
-    default: return 0;
+  switch(HexRecordStructure.recordType){
+    case 0: extractData(linePtr,HexRecordStructure);
+    /*case '01':
+    case '02':
+    case '03':
+    case '04':
+    case '05':
+    */
 
   }
 
+  //return baseMemory;
 
 }

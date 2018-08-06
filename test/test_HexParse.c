@@ -9,21 +9,92 @@
 
 #define k 1024
 
-int *baseMemory = malloc(128*k);
 
 void setUp(void){}
 
 void tearDown(void){}
-
+/*
 void test_openFile()
 {
   openFile();
 }
-
+*/
 void test_readFile(void)
 {
-  readFile();
+  /*--------------exampleHex.hex----------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:10C010006C6C7920676F207468726F756768206137
+   *:10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:04C040007696E673FF
+   *:00000001FF
+   */
+
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("exampleHex.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  hexLineRead = readFile(fp);
+  printf("In test function : %s", hexLineRead);
+  TEST_ASSERT_EQUAL_STRING(":10C00000576F77212044696420796F7520726561CC",hexLineRead);
 }
+
+void test_readFile_read_3rd_hex_line_from_hex_file(void)
+{
+  /*--------------exampleHex.hex----------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:10C010006C6C7920676F207468726F756768206137
+   *:10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:04C040007696E673FF
+   *:00000001FF
+   */
+
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("exampleHex.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+  for(int i = 0; i < 3;i++)
+  {
+    hexLineRead = readFile(fp);
+  }
+
+  printf("In test function : %s", hexLineRead);
+  TEST_ASSERT_EQUAL_STRING(":10C020006C6C20746869732074726F75626C652023",hexLineRead);
+}
+
+void test_readFile_read_every_hex_line_from_hex_file(void)
+{
+  /*--------------exampleHex.hex----------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:10C010006C6C7920676F207468726F756768206137
+   *:10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:04C040007696E673FF
+   *:00000001FF
+   */
+
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("exampleHex.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  while((hexLineRead = readFile(fp)) != NULL)
+  {
+    printf("In test function : %s\n", hexLineRead);
+  }
+}
+
 /*------------test for code working properly-----------------*/
 
 void test_checkColon_check_for_colon_sign_return_true(void){
@@ -83,7 +154,7 @@ void test_extractData_given_FFFF_return_true(void)
 
   TEST_ASSERT_EQUAL(0xFF,dataReturn);
 }
-*/
+
 void test_extractData_given_FF3C_and_extract_and_locate_properly_in_memory(void)
 {
   int *memory_test;
@@ -95,7 +166,7 @@ void test_extractData_given_FF3C_and_extract_and_locate_properly_in_memory(void)
   TEST_ASSERT_EQUAL(0xFF,memory_test[0]);
   TEST_ASSERT_EQUAL(0x3C,memory_test[1]);
 }
-/*
+
 void test_verifyHexLine_with_16_byte_data_return_true(void)
 {
   char *line = ":10010000214601360121470136007EFE09D2190140";
@@ -217,11 +288,57 @@ void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void test_interpretHexLine(void)
+int test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
 {
-  char *line = ":0B0010006164647265737320676170A7";
+  /*--------------exampleHex.hex----------------
+   *:10C00000576F77212044696420796F7520726561C(P)
+   *:10C010006C6C7920676F207468726F756768206137
+   *:10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:04C040007696E673FF
+   *:00000001FF
+   */
+  CEXCEPTION_T e;
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("testError.hex","r");
 
-  baseMemory = hexParse(line);
-  TEST_ASSERT_EQUAL
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+  Try{
+  hexLineRead = readFile(fp);
+  TEST_FAIL_MESSAGE("Expect ERR_UNKNOWN_DATA. But no exception thrown.");
+  }
+  Catch(e)
+  {
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_UNKNOWN_DATA, e->errorCode);
+    freeError(e);
+  }
+}
 
+int test_hexParse_read_1st_hex_line_from_file_and_return_true(void)
+{
+  /*--------------exampleHex.hex----------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:10C010006C6C7920676F207468726F756768206137
+   *:10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:04C040007696E673FF
+   *:00000001FF
+   */
+
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("exampleHex.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  hexLineRead = readFile(fp);
+  //printf("In test function : %s", hexLineRead);
+  TEST_ASSERT_EQUAL_STRING(":10C00000576F77212044696420796F7520726561CC",hexLineRead);
+  TEST_ASSERT_TRUE(hexParse(hexLineRead));
 }
