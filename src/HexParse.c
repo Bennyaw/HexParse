@@ -11,7 +11,7 @@
 #include "CException.h"
 
 #define k 1024
-uint8_t dataMemory[256*k];//1024*1024
+uint8_t dataMemory[256*k];//256*1024
 //int *baseMemory = malloc(128*k);
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
@@ -253,7 +253,7 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
 }
 
 //---------------------main function--------------------------
-int hexParse(char *linePtr)
+uint8_t *hexParse(char *linePtr)
 {
   HexRecordStructure HexRecordStructure;
   char *ptrForVerify = linePtr;
@@ -274,7 +274,7 @@ int hexParse(char *linePtr)
 
     interpretHexLine(linePtr,HexRecordStructure);
 
-    return 1;
+    return dataMemory;
   }
   else
   {
@@ -287,6 +287,7 @@ void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
 
   switch(HexRecordStructure.recordType){
     case 0: extractData(linePtr,HexRecordStructure);
+    case 1: exit -1;
     /*case '01':
     case '02':
     case '03':

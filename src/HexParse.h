@@ -21,7 +21,7 @@ int extractRecordType(char **linePtr);
 void extractData(char *linePtr,HexRecordStructure HexRecordStructure);
 int verifyHexLine(char **linePtr);
 int convertHexToDec(char **linePtr, int decimal, int p, int base);
-int hexParse(char *linePtr);
+uint8_t *hexParse(char *linePtr);
 void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure);
 
 #endif // _HEXPARSE_H
