@@ -13,6 +13,8 @@
 #define k 1024
 uint8_t dataMemory[256*k];//256*1024
 uint64_t segmentAddress;
+int enableSegmentAddress = 0;
+int enableLinearAddress = 0;
 //int *baseMemory = malloc(128*k);
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
@@ -155,7 +157,7 @@ int extractRecordType(char **linePtr)
 }
 
 
-void extractData(char *linePtr,HexRecordStructure HexRecordStructure)
+void loadData(char *linePtr,HexRecordStructure HexRecordStructure)
 {
 
   int byteCount = HexRecordStructure.byteCount;//for loading every two bytes in to memory
@@ -175,10 +177,20 @@ void extractData(char *linePtr,HexRecordStructure HexRecordStructure)
       count++;
     }
 
-    dataMemory[HexRecordStructure.address] = data;//load data in to memory
-    printf("dataMemory[%x] = %x\n",HexRecordStructure.address,data );
-    HexRecordStructure.address++;
-    byteCount--;
+    if(enableSegmentAddress == 1)
+    {
+      dataMemory[segmentAddress + HexRecordStructure.address] = data;
+      printf("dataMemory[%x] = %x\n",segmentAddress + HexRecordStructure.address,data);
+      HexRecordStructure.address++;
+      byteCount--;
+    }
+    else
+    {
+      dataMemory[HexRecordStructure.address] = data;//load data in to memory
+      printf("dataMemory[%x] = %x\n",HexRecordStructure.address,data);
+      HexRecordStructure.address++;
+      byteCount--;
+    }
 
   }
 
@@ -258,9 +270,6 @@ uint8_t *hexParse(char *linePtr)
 {
   HexRecordStructure HexRecordStructure;
   char *ptrForVerify = linePtr;
-  int getAddress = 0;
-  int recordType = 0;
-  int byteCount = 0;
 
   if (verifyHexLine(&ptrForVerify))
   {
@@ -271,11 +280,18 @@ uint8_t *hexParse(char *linePtr)
 
     HexRecordStructure.byteCount = getByteCount(&linePtr);//get size of data
     HexRecordStructure.address = extractAddress(&linePtr);
-    HexRecordStructure.recordType = extractRecordType(&linePtr);//error thrown in the funciton
+    HexRecordStructure.recordType = extractRecordType(&linePtr);//error thrown in the function
+//-------------linePtr now is pointing to data field---------------------------
 
-    interpretHexLine(linePtr,HexRecordStructure);
+  if(HexRecordStructure.recordType == 2)
+  {
+    enableSegmentAddress = 1;
+    enableLinearAddress = 0;
+  }
 
-    return dataMemory;
+  interpretHexLine(linePtr,HexRecordStructure);
+
+  return dataMemory;
   }
   else
   {
@@ -287,13 +303,16 @@ void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
 {
 
   switch(HexRecordStructure.recordType){
-    case 0: extractData(linePtr,HexRecordStructure);
+    case 0: loadData(linePtr,HexRecordStructure);
       break;
-    case 1: exit -1;
+    case 1: enableLinearAddress = 0;
+            enableSegmentAddress = 0;
+            exit -1;
       break;
-    case 2:
+    case 2: segmentAddress = extractAddress(&linePtr) * 0x10;//extended segment address is recorded in data field
+      break;
+    case 3: loadData(linePtr,HexRecordStructure);
 
   }
-
 
 }

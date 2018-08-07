@@ -149,7 +149,7 @@ void xtest_extractRecordType_given_00(void)
 
 /*----------------------test with exception-----------------------*/
 
-void xtest_checkColon_without_colon_sign_and_throw_ERR_COLON_MISSING(void)
+void test_checkColon_without_colon_sign_and_throw_ERR_COLON_MISSING(void)
 {
   CEXCEPTION_T e;
   char *line = "02000004FFFFFC";
@@ -165,7 +165,7 @@ void xtest_checkColon_without_colon_sign_and_throw_ERR_COLON_MISSING(void)
   }
 }
 
-void xtest_verifyHexLine_with_single_byte_data_error_and_throw_ERR_DATA_CORRUPTED(void)
+void test_verifyHexLine_with_single_byte_data_error_and_throw_ERR_DATA_CORRUPTED(void)
 {
   CEXCEPTION_T e;
   char *line = ":10010000214601360121470136007EFE09E2190140";
@@ -181,7 +181,7 @@ void xtest_verifyHexLine_with_single_byte_data_error_and_throw_ERR_DATA_CORRUPTE
   }
 }
 
-void xtest_verifyHexLine_with_space_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
+void test_verifyHexLine_with_space_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
 {
   CEXCEPTION_T e;
   char *line = ":1001000021460 360121470136007EFE09D2190140";
@@ -197,7 +197,7 @@ void xtest_verifyHexLine_with_space_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void xtest_verifyHexLine_without_colon_and_throw_ERR_COLON_MISSING(void)
+void test_verifyHexLine_without_colon_and_throw_ERR_COLON_MISSING(void)
 {
   CEXCEPTION_T e;
   char *line = "1001000021460360121470136007EFE09D2190140";
@@ -213,7 +213,7 @@ void xtest_verifyHexLine_without_colon_and_throw_ERR_COLON_MISSING(void)
   }
 }
 
-void xtest_extractRecordType_with_56_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
+void test_extractRecordType_with_56_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
 {
   CEXCEPTION_T e;
   char *line = "56";
@@ -229,7 +229,7 @@ void xtest_extractRecordType_with_56_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
   }
 }
 
-void xtest_extractAddress_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
+void test_extractAddress_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
 {
   CEXCEPTION_T e;
   char *line = "000Z";
@@ -245,7 +245,7 @@ void xtest_extractAddress_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void
   }
 }
 
-void xtest_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
+void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
 {
   CEXCEPTION_T e;
   char *line = "1P";
@@ -261,7 +261,7 @@ void xtest_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void xtest_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
+void test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561C(P)
@@ -292,7 +292,7 @@ void xtest_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void xtest_hexParse_read_1st_hex_line_from_file_and_return_true(void)
+void test_hexParse_read_1st_hex_line_from_file_and_return_true(void)
 {
   uint8_t expectedData[] = {
     [0xC000] = 0x57, 0x6f, 0x77, 0x21, 0x20, 0x44, 0x69, 0x64,
@@ -323,7 +323,7 @@ void xtest_hexParse_read_1st_hex_line_from_file_and_return_true(void)
   TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,16);
 }
 
-void xtest_hexParse_read_all_hex_line_from_file_and_return_true(void)
+void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
 {
   char *hexFile[] = {
     ":10C00000576F77212044696420796F7520726561CC",
@@ -355,13 +355,17 @@ void xtest_hexParse_read_all_hex_line_from_file_and_return_true(void)
 
 void test_hexParse_read_assemblerApp_file_and_return_true(void)
 {
-  /*----------------assemblerApp.hex------------------
-   *:020000020000FC
-   *:0C00000000C001E01AE0100F0395FFCFD4
+  /**----------------assemblerApp.hex------------------
+   *:020000022BC011
+   *:1012340054686973207061727420697320696E2028
    *:00000001FF
-   *-------------------------------------------------*/
-
-  int i = 0;
+   *-------------------------------------------------**/
+   uint8_t expectedData[] = {
+     [0x2CE34] = 0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
+     0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
+     0x6E, 0x20
+   };
+  uint8_t *verifyData;
   FILE *fp;
   char *hexLineRead;
   fp = fopen("assemblerApp.hex","r");
@@ -372,10 +376,7 @@ void test_hexParse_read_assemblerApp_file_and_return_true(void)
 
   while((hexLineRead = readFile(fp)) != NULL)
   {
-    //uint8_t expectedData[] = {0x57, 0x6f, ...};
-    //printf("In test function : %s", hexLineRead);
-    TEST_ASSERT_EQUAL_STRING(hexFile[i],hexLineRead);
-    TEST_ASSERT_TRUE(hexParse(hexLineRead));
-    i++;
+    verifyData = hexParse(hexLineRead);
   }
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,12);
 }
