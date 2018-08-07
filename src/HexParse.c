@@ -12,6 +12,7 @@
 
 #define k 1024
 uint8_t dataMemory[256*k];//256*1024
+uint64_t segmentAddress;
 //int *baseMemory = malloc(128*k);
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
@@ -287,16 +288,12 @@ void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
 
   switch(HexRecordStructure.recordType){
     case 0: extractData(linePtr,HexRecordStructure);
+      break;
     case 1: exit -1;
-    /*case '01':
-    case '02':
-    case '03':
-    case '04':
-    case '05':
-    */
+      break;
+    case 2:
 
   }
 
-  //return baseMemory;
 
 }
