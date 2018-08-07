@@ -20,7 +20,7 @@ void test_openFile()
 }
 */
 
-void xtest_readFile(void)
+void test_readFile(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
@@ -44,7 +44,7 @@ void xtest_readFile(void)
   TEST_ASSERT_EQUAL_STRING(":10C00000576F77212044696420796F7520726561CC",hexLineRead);
 }
 
-void xtest_readFile_read_3rd_hex_line_from_hex_file(void)
+void test_readFile_read_3rd_hex_line_from_hex_file(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
@@ -71,7 +71,7 @@ void xtest_readFile_read_3rd_hex_line_from_hex_file(void)
   TEST_ASSERT_EQUAL_STRING(":10C020006C6C20746869732074726F75626C652023",hexLineRead);
 }
 
-void xtest_readFile_read_every_hex_line_from_hex_file(void)
+void test_readFile_read_every_hex_line_from_hex_file(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
@@ -98,49 +98,49 @@ void xtest_readFile_read_every_hex_line_from_hex_file(void)
 
 /*------------test for code working properly-----------------*/
 
-void xtest_checkColon_check_for_colon_sign_return_true(void){
+void test_checkColon_check_for_colon_sign_return_true(void){
     char *line = ":";
 
     TEST_ASSERT_TRUE(checkColon(&line));
 }
 
 
-void xtest_getByteCount_given_byte_count_10_hex_convert_into_decimal(void)
+void test_getByteCount_given_byte_count_10_hex_convert_into_decimal(void)
 {
   char *line = "10";
 
   TEST_ASSERT_EQUAL(16,getByteCount(&line));
 }
 
-void xtest_getByteCount_given_byte_count_1a_hex_convert_into_decimal(void)
+void test_getByteCount_given_byte_count_1a_hex_convert_into_decimal(void)
 {
   char *line = "1a";
 
   TEST_ASSERT_EQUAL(26,getByteCount(&line));
 }
 
-void xtest_getByteCount_given_byte_count_0B_hex_convert_into_decimal(void)
+void test_getByteCount_given_byte_count_0B_hex_convert_into_decimal(void)
 {
   char *line = "0B";
 
   TEST_ASSERT_EQUAL(11,getByteCount(&line));
 }
 
-void xtest_extractAddress_given_000A(void)
+void test_extractAddress_given_000A(void)
 {
   char *line = "000A";
   uint16_t addressReturn = extractAddress(&line);
   TEST_ASSERT_EQUAL(0x000A,addressReturn);
 }
 
-void xtest_extractAddress_given_ffff_return_cap_letter(void)
+void test_extractAddress_given_ffff_return_cap_letter(void)
 {
   char *line = "ffff";
   uint16_t addressReturn = extractAddress(&line);
   TEST_ASSERT_EQUAL(0xFFFF,addressReturn);
 }
 
-void xtest_extractRecordType_given_00(void)
+void test_extractRecordType_given_00(void)
 {
   char *line = "05";
   int recordTypeReturn = extractRecordType(&line);
@@ -261,12 +261,12 @@ void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
+void test_hexParse_with_hex_line_read_from_file_1st_line_throw_ERR_UNKNOWN_DATA(void)
 {
   /*--------------exampleHex.hex----------------
    *:10C00000576F77212044696420796F7520726561C(P)
    *:10C010006C6C7920676F207468726F756768206137
-   *:10C020006C6C20746869732074726F75626C652023
+   *10C020006C6C20746869732074726F75626C652023
    *:10C03000746F207265616420746869732073747210
    *:04C040007696E673FF
    *:00000001FF
@@ -274,7 +274,7 @@ void test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
   CEXCEPTION_T e;
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("testError.hex","r");
+  fp = fopen("testErrorData.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -292,7 +292,44 @@ void test_hexParse_with_hex_line_read_from_file_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void test_hexParse_read_1st_hex_line_from_file_and_return_true(void)
+void test_readFile_read_3rd_hex_line_from_hex_file_and_throw_ERR_COLON_MISSING(void)
+{
+  /*--------------exampleHex.hex----------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:10C010006C6C7920676F207468726F756768206137
+   *10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:04C040007696E673FF
+   *:00000001FF
+   */
+  CEXCEPTION_T e;
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("testErrorColon.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+  Try{
+    for(int i = 0; i < 3;i++)
+    {
+      hexLineRead = readFile(fp);
+    }
+    TEST_ASSERT_EQUAL_STRING(":10C020006C6C20746869732074726F75626C652023",hexLineRead);
+    TEST_FAIL_MESSAGE("Expect ERR_COLON_MISSING. But no exception thrown.");
+  }
+  Catch(e)
+  {
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_COLON_MISSING, e->errorCode);
+    freeError(e);
+  }
+
+  //printf("In test function : %s", hexLineRead);
+
+}
+
+void test_hexParse_read_1st_hex_line_from_file_and_extract_data_correctly(void)
 {
   uint8_t expectedData[] = {
     [0xC000] = 0x57, 0x6f, 0x77, 0x21, 0x20, 0x44, 0x69, 0x64,
@@ -353,7 +390,7 @@ void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
   }
 }
 
-void test_hexParse_read_assemblerApp_file_and_return_true(void)
+void xtest_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_true(void)
 {
   /**----------------assemblerApp.hex------------------
    *:020000022BC011
@@ -362,6 +399,34 @@ void test_hexParse_read_assemblerApp_file_and_return_true(void)
    *-------------------------------------------------**/
    uint8_t expectedData[] = {
      [0x2CE34] = 0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
+     0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
+     0x6E, 0x20
+   };
+  uint8_t *verifyData;
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("assemblerApp.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  while((hexLineRead = readFile(fp)) != NULL)
+  {
+    verifyData = hexParse(hexLineRead);
+  }
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,12);
+}
+
+void test_hexParse_read_assemblerApp_related_to_lineartAddress_file_and_return_true(void)
+{
+  /**----------------assemblerApp.hex------------------
+   *:020000040000FA
+   *:1012340054686973207061727420697320696E2028
+   *:00000001FF
+   *-------------------------------------------------**/
+   uint8_t expectedData[] = {
+     [0x1234] = 0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
      0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
      0x6E, 0x20
    };

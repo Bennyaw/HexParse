@@ -6,7 +6,7 @@
 typedef struct HexRecordStructure HexRecordStructure;
 struct HexRecordStructure{
   int byteCount;
-  uint64_t address;
+  uint32_t address;
   int recordType;
   int enableSegmentAddress;
   int enableLinearAddress;

@@ -12,7 +12,9 @@
 
 #define k 1024
 uint8_t dataMemory[256*k];//256*1024
-uint64_t segmentAddress;
+uint32_t segmentAddress;
+uint32_t linearAddress;
+uint32_t start32BitAddress;
 int enableSegmentAddress = 0;
 int enableLinearAddress = 0;
 //int *baseMemory = malloc(128*k);
@@ -184,6 +186,13 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure)
       HexRecordStructure.address++;
       byteCount--;
     }
+    else if(enableLinearAddress == 1)
+    {
+      dataMemory[linearAddress + HexRecordStructure.address] = data;
+      printf("dataMemory[%x] = %x\n",linearAddress + HexRecordStructure.address,data);
+      HexRecordStructure.address++;
+      byteCount--;
+    }
     else
     {
       dataMemory[HexRecordStructure.address] = data;//load data in to memory
@@ -288,6 +297,11 @@ uint8_t *hexParse(char *linePtr)
     enableSegmentAddress = 1;
     enableLinearAddress = 0;
   }
+  else if(HexRecordStructure.recordType == 4)
+  {
+    enableSegmentAddress = 0;
+    enableLinearAddress = 1;
+  }
 
   interpretHexLine(linePtr,HexRecordStructure);
 
@@ -301,6 +315,8 @@ uint8_t *hexParse(char *linePtr)
 
 void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
 {
+  uint32_t tempAddress;
+  uint32_t tempAddress2;
 
   switch(HexRecordStructure.recordType){
     case 0: loadData(linePtr,HexRecordStructure);
@@ -311,8 +327,13 @@ void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
       break;
     case 2: segmentAddress = extractAddress(&linePtr) * 0x10;//extended segment address is recorded in data field
       break;
-    case 3: loadData(linePtr,HexRecordStructure);
-
+    case 4: linearAddress = extractAddress(&linePtr) * 0x10000;//extended linear address is recorded in data field
+      break;
+    case 3:
+    case 5: tempAddress = extractAddress(&linePtr) * 0x10000;
+            tempAddress2 = extractAddress(&linePtr);
+            start32BitAddress = tempAddress + tempAddress2;//extract 32 bit address and save it in global variable
+      break;
   }
 
 }
