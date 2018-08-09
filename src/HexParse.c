@@ -15,9 +15,9 @@ uint8_t dataMemory[256*k];//256*1024
 uint32_t segmentAddress;
 uint32_t linearAddress;
 uint32_t start32BitAddress;
-int enableSegmentAddress = 0;
-int enableLinearAddress = 0;
-//int *baseMemory = malloc(128*k);
+int enableSegmentAddress = 0; //act as a flag to indicate segment address record
+int enableLinearAddress = 0;//act as a flag to indicate it is linear address record
+
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
 *   01 - End Of FILE
@@ -47,7 +47,7 @@ int enableLinearAddress = 0;
 * modulo 256 and taking the two's complement.
 * -------------------------------------------------------*/
 
-//--------testing open file-------------
+//-----------------testing open file--------------------
 int openFile(void)
 {
   FILE * fp;
@@ -158,53 +158,6 @@ int extractRecordType(char **linePtr)
 
 }
 
-
-void loadData(char *linePtr,HexRecordStructure HexRecordStructure)
-{
-
-  int byteCount = HexRecordStructure.byteCount;//for loading every two bytes in to memory
-
-  while(byteCount!=0)
-  {
-    int count = 0;
-    int base = 1;
-    int power = 1;
-    int data = 0;
-
-    while(count<2)
-    {
-      base = (int)pow((double)16,power);  //16^3
-      data = convertHexToDec(&linePtr, data, power, base);
-      power--;  //decrement power
-      count++;
-    }
-
-    if(enableSegmentAddress == 1)
-    {
-      dataMemory[segmentAddress + HexRecordStructure.address] = data;
-      printf("dataMemory[%x] = %x\n",segmentAddress + HexRecordStructure.address,data);
-      HexRecordStructure.address++;
-      byteCount--;
-    }
-    else if(enableLinearAddress == 1)
-    {
-      dataMemory[linearAddress + HexRecordStructure.address] = data;
-      printf("dataMemory[%x] = %x\n",linearAddress + HexRecordStructure.address,data);
-      HexRecordStructure.address++;
-      byteCount--;
-    }
-    else
-    {
-      dataMemory[HexRecordStructure.address] = data;//load data in to memory
-      printf("dataMemory[%x] = %x\n",HexRecordStructure.address,data);
-      HexRecordStructure.address++;
-      byteCount--;
-    }
-
-  }
-
-}
-
 int verifyHexLine(char **linePtr)
 {
   uint16_t getData = 0,addData = 0;
@@ -290,7 +243,7 @@ uint8_t *hexParse(char *linePtr)
     HexRecordStructure.byteCount = getByteCount(&linePtr);//get size of data
     HexRecordStructure.address = extractAddress(&linePtr);
     HexRecordStructure.recordType = extractRecordType(&linePtr);//error thrown in the function
-//-------------linePtr now is pointing to data field---------------------------
+// linePtr now is pointing to data field
 
   if(HexRecordStructure.recordType == 2)
   {
@@ -334,6 +287,52 @@ void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
             tempAddress2 = extractAddress(&linePtr);
             start32BitAddress = tempAddress + tempAddress2;//extract 32 bit address and save it in global variable
       break;
+  }
+
+}
+
+void loadData(char *linePtr,HexRecordStructure HexRecordStructure)
+{
+
+  int byteCount = HexRecordStructure.byteCount;//for loading every two bytes in to memory
+
+  while(byteCount!=0)
+  {
+    int count = 0;
+    int base = 1;
+    int power = 1;
+    int data = 0;
+
+    while(count<2)
+    {
+      base = (int)pow((double)16,power);  //16^3
+      data = convertHexToDec(&linePtr, data, power, base);
+      power--;  //decrement power
+      count++;
+    }
+
+    if(enableSegmentAddress == 1)
+    {
+      dataMemory[segmentAddress + HexRecordStructure.address] = data;
+      printf("dataMemory[%x] = %x\n",segmentAddress + HexRecordStructure.address,data);
+      HexRecordStructure.address++;
+      byteCount--;
+    }
+    else if(enableLinearAddress == 1)
+    {
+      dataMemory[linearAddress + HexRecordStructure.address] = data;
+      printf("dataMemory[%x] = %x\n",linearAddress + HexRecordStructure.address,data);
+      HexRecordStructure.address++;
+      byteCount--;
+    }
+    else
+    {
+      dataMemory[HexRecordStructure.address] = data;//load data in to memory
+      printf("dataMemory[%x] = %x\n",HexRecordStructure.address,data);
+      HexRecordStructure.address++;
+      byteCount--;
+    }
+
   }
 
 }
