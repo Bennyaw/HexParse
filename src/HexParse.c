@@ -11,13 +11,14 @@
 #include "CException.h"
 
 #define k 1024
-uint8_t dataMemory[256*k];//256*1024
+uint8_t flashMemory[256*k];//256*1024
 uint32_t segmentAddress;
 uint32_t linearAddress;
 uint32_t start32BitAddress;
-int enableSegmentAddress = 0; //act as a flag to indicate segment address record
-int enableLinearAddress = 0;//act as a flag to indicate it is linear address record
+int enableSegmentAddress = 0;
+int enableLinearAddress = 0;
 
+/*    all printf is to debug code, for checing purpose  */
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
 *   01 - End Of FILE
@@ -66,7 +67,7 @@ char *readFile(FILE *fileLocation)
   char *hexLine = malloc(k);
   if(fgets (hexLine, k, fileLocation) != NULL){
     hexLinelength = strlen(hexLine);
-    hexLine[hexLinelength-1] = '\0';
+    hexLine[hexLinelength-1] = '\0';//replace '\n' at the end of the line
   }
   else{
     return NULL;
@@ -98,11 +99,11 @@ int getByteCount(char **linePtr)
   int base = 1;
   int power = 1;
 
-  while(count<2) // after colon sign
+  while(count<2)
   {
     base = (int)pow((double)16,power);  //16^1
     decimal = convertHexToDec(linePtr, decimal, power, base);
-    power--;  //move from power 1 to 0
+    power--; //decrement power
     count++;
   }
 
@@ -116,9 +117,26 @@ int extractAddress (char **linePtr)
   int power = 3;
   int intaddress = 0;
 
-  while(count<4) // after colon sign
+  while(count<4)
   {
-    base = (int)pow((double)16,power);  //16^3
+    base = (int)pow((double)16,power);  //start with 16^3
+    intaddress = convertHexToDec(linePtr, intaddress, power, base);
+    power--;  //decrement power
+    count++;
+  }
+  return intaddress;
+}
+
+uint64_t extract4BytesAddress(char **linePtr)
+{
+  int decimal = 0,count = 0;
+  int base = 1;
+  int power = 7;
+  uint64_t intaddress = 0;
+
+  while(count<8)
+  {
+    base = (int)pow((double)16,power);  // start with 16^7
     intaddress = convertHexToDec(linePtr, intaddress, power, base);
     power--;  //decrement power
     count++;
@@ -183,10 +201,9 @@ int verifyHexLine(char **linePtr)
       }
     }
 
-    verifyData = addData & 0xff;//if not zero then is error data
     //printf("verifyData(non-zero means error data) : %u\n", verifyData);//checking hex digit whether is 00
 
-    if(verifyData == 0)
+    if((addData & 0xff) == 0)//if not zero then is error data
     {
       return 1;
     }
@@ -258,7 +275,7 @@ uint8_t *hexParse(char *linePtr)
 
   interpretHexLine(linePtr,HexRecordStructure);
 
-  return dataMemory;
+  return flashMemory;
   }
   else
   {
@@ -286,6 +303,7 @@ void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
     case 5: tempAddress = extractAddress(&linePtr) * 0x10000;
             tempAddress2 = extractAddress(&linePtr);
             start32BitAddress = tempAddress + tempAddress2;//extract 32 bit address and save it in global variable
+            printf("32BitAddress : %x\n", start32BitAddress);
       break;
   }
 
@@ -313,22 +331,22 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure)
 
     if(enableSegmentAddress == 1)
     {
-      dataMemory[segmentAddress + HexRecordStructure.address] = data;
-      printf("dataMemory[%x] = %x\n",segmentAddress + HexRecordStructure.address,data);
+      flashMemory[segmentAddress + HexRecordStructure.address] = data;//load data in to memory
+      printf("flashMemory[%x] = %x\n",segmentAddress + HexRecordStructure.address,data);
       HexRecordStructure.address++;
       byteCount--;
     }
     else if(enableLinearAddress == 1)
     {
-      dataMemory[linearAddress + HexRecordStructure.address] = data;
-      printf("dataMemory[%x] = %x\n",linearAddress + HexRecordStructure.address,data);
+      flashMemory[linearAddress + HexRecordStructure.address] = data;//load data in to memory
+      printf("flashMemory[%x] = %x\n",linearAddress + HexRecordStructure.address,data);
       HexRecordStructure.address++;
       byteCount--;
     }
     else
     {
-      dataMemory[HexRecordStructure.address] = data;//load data in to memory
-      printf("dataMemory[%x] = %x\n",HexRecordStructure.address,data);
+      flashMemory[HexRecordStructure.address] = data;//load data in to memory
+      printf("flashMemory[%x] = %x\n",HexRecordStructure.address,data);
       HexRecordStructure.address++;
       byteCount--;
     }

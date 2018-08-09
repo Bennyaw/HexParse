@@ -40,7 +40,7 @@ void test_readFile(void)
   }
 
   hexLineRead = readFile(fp);
-  printf("In test function : %s", hexLineRead);
+  //printf("In test function : %s", hexLineRead);
   TEST_ASSERT_EQUAL_STRING(":10C00000576F77212044696420796F7520726561CC",hexLineRead);
 }
 
@@ -67,7 +67,7 @@ void test_readFile_read_3rd_hex_line_from_hex_file(void)
     hexLineRead = readFile(fp);
   }
 
-  printf("In test function : %s", hexLineRead);
+  //printf("In test function : %s", hexLineRead);
   TEST_ASSERT_EQUAL_STRING(":10C020006C6C20746869732074726F75626C652023",hexLineRead);
 }
 
@@ -443,4 +443,128 @@ void test_readFile_read_3rd_hex_line_from_hex_file_and_throw_ERR_COLON_MISSING(v
     freeError(e);
   }
 
+  //printf("In test function : %s", hexLineRead);
+
+}
+
+void test_hexParse_read_1st_hex_line_from_file_and_extract_data_correctly(void)
+{
+  uint8_t expectedData[] = {
+    [0xC000] = 0x57, 0x6f, 0x77, 0x21, 0x20, 0x44, 0x69, 0x64,
+    0x20, 0x79, 0x6F, 0x75, 0x20, 0x72, 0x65, 0x61
+    };
+  /*--------------exampleHex.hex----------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:10C010006C6C7920676F207468726F756768206137
+   *:10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:04C040007696E673FF
+   *:00000001FF
+   */
+
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("exampleHex.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  hexLineRead = readFile(fp);
+  uint8_t *verifyData;
+  verifyData = hexParse(hexLineRead);
+  //printf("In test function : %s", hexLineRead);
+  TEST_ASSERT_EQUAL_STRING(":10C00000576F77212044696420796F7520726561CC",hexLineRead);
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,16);
+}
+
+void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
+{
+  char *hexFile[] = {
+    ":10C00000576F77212044696420796F7520726561CC",
+    ":10C010006C6C7920676F207468726F756768206137",
+    ":10C020006C6C20746869732074726F75626C652023",
+    ":10C03000746F207265616420746869732073747210",
+    ":04C040007696E67397",
+    ":00000001FF"
+  };
+
+  int i = 0;
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("exampleHex.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  while((hexLineRead = readFile(fp)) != NULL)
+  {
+    TEST_ASSERT_EQUAL_STRING(hexFile[i],hexLineRead);
+    TEST_ASSERT_TRUE(hexParse(hexLineRead));
+    i++;
+  }
+}
+//succesfully working test, cancel out because of assemblerApp.hex modified to use for linear address test
+void xtest_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_true(void)
+{
+  /**----------------assemblerApp.hex------------------
+   *:020000022BC011
+   *:1012340054686973207061727420697320696E2028
+   *:00000001FF
+   *-------------------------------------------------**/
+   uint8_t expectedData[] = {
+     [0x2CE34] = 0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
+     0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
+     0x6E, 0x20
+   };
+  uint8_t *verifyData;
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("assemblerApp.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  while((hexLineRead = readFile(fp)) != NULL)
+  {
+    verifyData = hexParse(hexLineRead);
+  }
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,12);
+}
+
+void test_hexParse_read_assemblerApp_related_to_lineartAddress_file_and_return_true(void)
+{
+  /**----------------assemblerApp.hex------------------
+   *:020000040000FA
+   *:1012340054686973207061727420697320696E2028
+   *:00000001FF
+   *-------------------------------------------------**/
+   uint8_t expectedData[] = {
+     [0x1234] = 0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
+     0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
+     0x6E, 0x20
+   };
+  uint8_t *verifyData;
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("assemblerApp.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  while((hexLineRead = readFile(fp)) != NULL)
+  {
+    verifyData = hexParse(hexLineRead);
+  }
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,12);
+}
+
+void test_hexParse_read_recordtype_03_and_save_in_global_variable_start32BitAddress(void)
+{
+  char *line = ":0400000300003800C1";
+
+  TEST_ASSERT_TRUE(hexParse(line));
 }
