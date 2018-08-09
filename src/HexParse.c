@@ -256,11 +256,11 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
   {
     while(*linePtr == ':')
     {
-      linePtr++;//move pointer to address
+      linePtr++;//move pointer to address field
     }
 
-    HexRecordStructure.byteCount = getByteCount(&linePtr);//get size of data
-    HexRecordStructure.address = extractAddress(&linePtr);
+    HexRecordStructure.byteCount = getByteCount(&linePtr);//error thrown in the function
+    HexRecordStructure.address = extractAddress(&linePtr);//error thrown in the function
     HexRecordStructure.recordType = extractRecordType(&linePtr);//error thrown in the function
 //-------------linePtr now is pointing to data field---------------------------
 
@@ -313,7 +313,7 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flas
     int power = 1;
     int data = 0;
 
-    while(count<2)
+    while(count<2)//loading 1 byte data 
     {
       base = (int)pow((double)16,power);  //16^3
       data = convertHexToDec(&linePtr, data, power, base);
