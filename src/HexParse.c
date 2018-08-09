@@ -13,6 +13,7 @@
 #define k 1024
 uint8_t dataMemory[256*k];//256*1024
 uint64_t segmentAddress;
+uint64_t linearAddress;
 int enableSegmentAddress = 0;
 int enableLinearAddress = 0;
 //int *baseMemory = malloc(128*k);
@@ -115,6 +116,23 @@ int extractAddress (char **linePtr)
   int intaddress = 0;
 
   while(count<4) // after colon sign
+  {
+    base = (int)pow((double)16,power);  //16^3
+    intaddress = convertHexToDec(linePtr, intaddress, power, base);
+    power--;  //decrement power
+    count++;
+  }
+  return intaddress;
+}
+
+uint64_t extract4BytesAddress(char **linePtr)
+{
+  int decimal = 0,count = 0;
+  int base = 1;
+  int power = 7;
+  uint64_t intaddress = 0;
+
+  while(count<8) // after colon sign
   {
     base = (int)pow((double)16,power);  //16^3
     intaddress = convertHexToDec(linePtr, intaddress, power, base);
@@ -288,6 +306,11 @@ uint8_t *hexParse(char *linePtr)
     enableSegmentAddress = 1;
     enableLinearAddress = 0;
   }
+  else if(HexRecordStructure.recordType == 4)
+  {
+    enableSegmentAddress = 0;
+    enableLinearAddress = 1;
+  }
 
   interpretHexLine(linePtr,HexRecordStructure);
 
@@ -301,7 +324,6 @@ uint8_t *hexParse(char *linePtr)
 
 void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
 {
-
   switch(HexRecordStructure.recordType){
     case 0: loadData(linePtr,HexRecordStructure);
       break;
@@ -311,8 +333,12 @@ void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
       break;
     case 2: segmentAddress = extractAddress(&linePtr) * 0x10;//extended segment address is recorded in data field
       break;
-    case 3: loadData(linePtr,HexRecordStructure);
-
+    case 3: HexRecordStructure.address = extract4BytesAddress(&linePtr);
+      break;
+    case 4: linearAddress = extract4BytesAddress(&linePtr) * 0x10000;
+      break;
+    case 5: HexRecordStructure.address = extract4BytesAddress(&linePtr);
+      break;
   }
 
 }
