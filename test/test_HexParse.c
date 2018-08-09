@@ -387,7 +387,7 @@ void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
     i++;
   }
 }
-
+//succesfully working test, cancel out because of assemblerApp.hex modified to use for linear address test
 void xtest_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_true(void)
 {
   /**----------------assemblerApp.hex------------------
@@ -442,4 +442,11 @@ void test_hexParse_read_assemblerApp_related_to_lineartAddress_file_and_return_t
     verifyData = hexParse(hexLineRead);
   }
   TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,12);
+}
+
+void test_hexParse_read_recordtype_03_and_save_in_global_variable_start32BitAddress(void)
+{
+  char *line = ":0400000300003800C1";
+
+  TEST_ASSERT_TRUE(hexParse(line));
 }
