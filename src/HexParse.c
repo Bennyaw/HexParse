@@ -11,7 +11,7 @@
 #include "CException.h"
 
 #define k 1024
-uint8_t flashMemory[256*k];//256*1024
+
 uint32_t segmentAddress;
 uint32_t linearAddress;
 uint32_t start32BitAddress;
