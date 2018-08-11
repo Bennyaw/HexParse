@@ -35,7 +35,7 @@ void test_readFile(void)
 
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("exampleHex.hex","r");
+  fp = fopen("data/test/exampleHex.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -59,7 +59,7 @@ void test_readFile_read_3rd_hex_line_from_hex_file(void)
 
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("exampleHex.hex","r");
+  fp = fopen("data/test/exampleHex.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -86,7 +86,7 @@ void test_readFile_read_every_hex_line_from_hex_file(void)
 
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("exampleHex.hex","r");
+  fp = fopen("data/test/exampleHex.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -167,7 +167,7 @@ void test_hexParse_read_1st_hex_line_from_file_and_extract_data_correctly(void)
 
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("exampleHex.hex","r");
+  fp = fopen("data/test/exampleHex.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -195,7 +195,7 @@ void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
   int i = 0;
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("exampleHex.hex","r");
+  fp = fopen("data/test/exampleHex.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -203,7 +203,6 @@ void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
 
   while((hexLineRead = readFile(fp)) != NULL)
   {
-    //printf("In test function : %s", hexLineRead);
     TEST_ASSERT_EQUAL_STRING(hexFile[i],hexLineRead);
     i++;
   }
@@ -224,7 +223,7 @@ void xtest_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_
   uint8_t *verifyData;
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("assemblerApp.hex","r");
+  fp = fopen("data/test/assemblerApp.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -252,7 +251,7 @@ void test_hexParse_read_assemblerApp_related_to_lineartAddress_file_and_return_t
 
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("assemblerApp.hex","r");
+  fp = fopen("data/test/assemblerApp.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -263,6 +262,50 @@ void test_hexParse_read_assemblerApp_related_to_lineartAddress_file_and_return_t
     hexParse(hexLineRead,flashMemory);
   }
   TEST_ASSERT_EQUAL_MEMORY(expectedData,&flashMemory[0x31234],16);
+}
+
+void test_hexParse_read_assemblerApp_related_to_lineartAddress_and_segmentAddress_file_and_return_true(void)
+{
+  /**----------------linearAndSegment.hex------------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:020000040002F8
+   *:1012340054686973207061727420697320696E2028
+   *:020000022BC011
+   *:1012340054686973207061727420697320696E2028
+   *:00000001FF
+   *-------------------------------------------------**/
+   uint8_t expectedData00Type[] = {
+     0x57, 0x6f, 0x77, 0x21, 0x20, 0x44, 0x69, 0x64,
+     0x20, 0x79, 0x6F, 0x75, 0x20, 0x72, 0x65, 0x61
+     };
+
+   uint8_t expectedData04Type[] = {
+     0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
+     0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
+     0x6E, 0x20
+   };
+
+   uint8_t expectedData02Type[] = {
+     0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
+     0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
+     0x6E, 0x20
+   };
+
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("data/test/linearAndSegment.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  while((hexLineRead = readFile(fp)) != NULL)
+  {
+    hexParse(hexLineRead,flashMemory);
+  }
+  TEST_ASSERT_EQUAL_MEMORY(expectedData00Type,&flashMemory[0xC000],16);
+  TEST_ASSERT_EQUAL_MEMORY(expectedData04Type,&flashMemory[0x21234],16);
+  TEST_ASSERT_EQUAL_MEMORY(expectedData02Type,&flashMemory[0x2CE34],16);
 }
 
 void test_hexParse_read_recordtype_03_and_save_in_global_variable_start32BitAddress(void)
@@ -385,7 +428,7 @@ void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
   }
 }
 
-void test_hexParse_with_hex_line_read_from_file_1st_line_throw_ERR_UNKNOWN_DATA(void)
+void test_hexParse_with_hex_line_read_from_file_1st_line_with_a_space_throw_ERR_UNKNOWN_DATA(void)
 {
   /*--------------testErrorData.hex----------------
    *:10C00000576F77212044696420796F752072656 1CC
@@ -398,7 +441,7 @@ void test_hexParse_with_hex_line_read_from_file_1st_line_throw_ERR_UNKNOWN_DATA(
   CEXCEPTION_T e;
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("testErrorData.hex","r");
+  fp = fopen("data/test/testErrorData.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -429,7 +472,7 @@ void test_readFile_read_3rd_hex_line_from_hex_file_and_throw_ERR_COLON_MISSING(v
   CEXCEPTION_T e;
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("testErrorColon.hex","r");
+  fp = fopen("data/test/testErrorColon.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -449,8 +492,6 @@ void test_readFile_read_3rd_hex_line_from_hex_file_and_throw_ERR_COLON_MISSING(v
     freeError(e);
   }
 
-  //printf("In test function : %s", hexLineRead);
-
 }
 
 void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
@@ -466,7 +507,7 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
   CEXCEPTION_T e;
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("testErrorRecordType.hex","r");
+  fp = fopen("data/test/testErrorRecordType.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
@@ -485,7 +526,5 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
     TEST_ASSERT_EQUAL(ERR_UNKNOWN_RECORD_TYPE, e->errorCode);
     freeError(e);
   }
-
-  //printf("In test function : %s", hexLineRead);
 
 }
