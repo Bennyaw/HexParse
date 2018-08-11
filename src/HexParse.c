@@ -245,20 +245,22 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
 }
 
 //---------------------main function--------------------------
-uint8_t *hexParse(char *linePtr)
+void hexParse(char *linePtr, uint8_t *flashMemory)
 {
   HexRecordStructure HexRecordStructure;
   char *ptrForVerify = linePtr;
+  uint32_t tempAddress;
+  uint32_t tempAddress2;
 
-  if (verifyHexLine(&ptrForVerify))
+  if (verifyHexLine(&ptrForVerify))//error thrown inside verifyHexLine function
   {
     while(*linePtr == ':')
     {
-      linePtr++;//move pointer to address
+      linePtr++;//move pointer to address field
     }
 
-    HexRecordStructure.byteCount = getByteCount(&linePtr);//get size of data
-    HexRecordStructure.address = extractAddress(&linePtr);
+    HexRecordStructure.byteCount = getByteCount(&linePtr);//error thrown in the function
+    HexRecordStructure.address = extractAddress(&linePtr);//error thrown in the function
     HexRecordStructure.recordType = extractRecordType(&linePtr);//error thrown in the function
 // linePtr now is pointing to data field
 
@@ -266,50 +268,40 @@ uint8_t *hexParse(char *linePtr)
   {
     enableSegmentAddress = 1;
     enableLinearAddress = 0;
+    segmentAddress = extractAddress(&linePtr) * 0x10;//extended segment address is recorded in data field
   }
   else if(HexRecordStructure.recordType == 4)
   {
     enableSegmentAddress = 0;
     enableLinearAddress = 1;
+    linearAddress = extractAddress(&linePtr) * 0x10000;//extended linear address is recorded in data field
   }
-
-  interpretHexLine(linePtr,HexRecordStructure);
-
-  return flashMemory;
+  else if(HexRecordStructure.recordType == 1)
+  {
+    enableLinearAddress = 0;
+    enableSegmentAddress = 0;
+    exit -1;
+  }
+  else if(HexRecordStructure.recordType == 3 || HexRecordStructure.recordType == 5)
+  {
+    tempAddress = extractAddress(&linePtr) * 0x10000;
+    tempAddress2 = extractAddress(&linePtr);
+    start32BitAddress = tempAddress + tempAddress2;//extract 32 bit address and save it in global variable
+    printf("32BitAddress : %x\n", start32BitAddress);
   }
   else
   {
-    return 0;//error thrown inside verifyHexLine function
+    loadData(linePtr,HexRecordStructure,flashMemory);
+  }
+
+  }
+  else
+  {
+    exit -1;
   }
 }
 
-void interpretHexLine(char *linePtr, HexRecordStructure HexRecordStructure)
-{
-  uint32_t tempAddress;
-  uint32_t tempAddress2;
-
-  switch(HexRecordStructure.recordType){
-    case 0: loadData(linePtr,HexRecordStructure);
-      break;
-    case 1: enableLinearAddress = 0;
-            enableSegmentAddress = 0;
-            exit -1;
-      break;
-    case 2: segmentAddress = extractAddress(&linePtr) * 0x10;//extended segment address is recorded in data field
-      break;
-    case 4: linearAddress = extractAddress(&linePtr) * 0x10000;//extended linear address is recorded in data field
-      break;
-    case 3:
-    case 5: tempAddress = extractAddress(&linePtr) * 0x10000;
-            tempAddress2 = extractAddress(&linePtr);
-            start32BitAddress = tempAddress + tempAddress2;//extract 32 bit address and save it in global variable
-            printf("32BitAddress : %x\n", start32BitAddress);
-      break;
-  }
-
-}
-
-void loadData(char *linePtr,HexRecordStructure HexRecordStructure)
+void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flashMemory)
 {
 
   int byteCount = HexRecordStructure.byteCount;//for loading every two bytes in to memory
@@ -321,7 +313,7 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure)
     int power = 1;
     int data = 0;
 
-    while(count<2)
+    while(count<2)//loading 1 byte data
     {
       base = (int)pow((double)16,power);  //16^3
       data = convertHexToDec(&linePtr, data, power, base);

@@ -174,11 +174,11 @@ void test_hexParse_read_1st_hex_line_from_file_and_extract_data_correctly(void)
   }
 
   hexLineRead = readFile(fp);
-  uint8_t *verifyData;
-  verifyData = hexParse(hexLineRead);
-  //printf("In test function : %s", hexLineRead);
+
+  hexParse(hexLineRead,flashMemory);
+
   TEST_ASSERT_EQUAL_STRING(":10C00000576F77212044696420796F7520726561CC",hexLineRead);
-  TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,16);
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,&flashMemory[0xC000],16);
 }
 
 void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
@@ -203,10 +203,8 @@ void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
 
   while((hexLineRead = readFile(fp)) != NULL)
   {
-    //uint8_t expectedData[] = {0x57, 0x6f, ...};
     //printf("In test function : %s", hexLineRead);
     TEST_ASSERT_EQUAL_STRING(hexFile[i],hexLineRead);
-    TEST_ASSERT_TRUE(hexParse(hexLineRead));
     i++;
   }
 }
@@ -234,9 +232,9 @@ void xtest_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_
 
   while((hexLineRead = readFile(fp)) != NULL)
   {
-    hexParse(hexLineRead, flashMemory);
+    hexParse(hexLineRead,flashMemory);
   }
-  TEST_ASSERT_EQUAL_MEMORY(expectedData,&flashMemory[0x2CE34],12);
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,&flashMemory[0x2CE34],16);
 }
 
 void test_hexParse_read_assemblerApp_related_to_lineartAddress_file_and_return_true(void)
@@ -247,11 +245,11 @@ void test_hexParse_read_assemblerApp_related_to_lineartAddress_file_and_return_t
    *:00000001FF
    *-------------------------------------------------**/
    uint8_t expectedData[] = {
-     [0x11234] = 0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
+     0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
      0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
      0x6E, 0x20
    };
-  uint8_t *verifyData;
+
   FILE *fp;
   char *hexLineRead;
   fp = fopen("assemblerApp.hex","r");
@@ -262,16 +260,16 @@ void test_hexParse_read_assemblerApp_related_to_lineartAddress_file_and_return_t
 
   while((hexLineRead = readFile(fp)) != NULL)
   {
-    verifyData = hexParse(hexLineRead);
+    hexParse(hexLineRead,flashMemory);
   }
-  TEST_ASSERT_EQUAL_MEMORY(expectedData,verifyData,12);
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,&flashMemory[0x31234],16);
 }
 
 void test_hexParse_read_recordtype_03_and_save_in_global_variable_start32BitAddress(void)
 {
   char *line = ":0400000300003800C1";
 
-  TEST_ASSERT_TRUE(hexParse(line));
+  hexParse(line,flashMemory);
 }
 /*----------------------test with exception-----------------------*/
 
@@ -390,7 +388,7 @@ void test_getByteCount_with_unregconised_data_and_throw_ERR_UNKNOWN_DATA(void)
 void test_hexParse_with_hex_line_read_from_file_1st_line_throw_ERR_UNKNOWN_DATA(void)
 {
   /*--------------testErrorData.hex----------------
-   *:10C00000576F77212044696420796F7520726561C(P)
+   *:10C00000576F77212044696420796F752072656 1CC
    *:10C010006C6C7920676F207468726F756768206137
    *10C020006C6C20746869732074726F75626C652023
    *:10C03000746F207265616420746869732073747210
@@ -407,7 +405,7 @@ void test_hexParse_with_hex_line_read_from_file_1st_line_throw_ERR_UNKNOWN_DATA(
   }
   Try{
   hexLineRead = readFile(fp);
-  TEST_ASSERT_TRUE(hexParse(hexLineRead));
+  hexParse(hexLineRead,flashMemory);
   TEST_FAIL_MESSAGE("Expect ERR_UNKNOWN_DATA. But no exception thrown.");
   }
   Catch(e)
@@ -441,7 +439,7 @@ void test_readFile_read_3rd_hex_line_from_hex_file_and_throw_ERR_COLON_MISSING(v
     {
       hexLineRead = readFile(fp);
     }
-    TEST_ASSERT_TRUE(hexParse(hexLineRead));
+    hexParse(hexLineRead,flashMemory);
     TEST_FAIL_MESSAGE("Expect ERR_COLON_MISSING. But no exception thrown.");
   }
   Catch(e)
@@ -460,7 +458,7 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
   /*--------------testErrorRecordType.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
    *:10C010066C6C7920676F207468726F756768206131
-   *10C020006C6C20746869732074726F75626C652023
+   *:10C020006C6C20746869732074726F75626C652023
    *:10C03000746F207265616420746869732073747210
    *:04C040007696E673FF
    *:00000001FF
@@ -478,7 +476,7 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
     {
       hexLineRead = readFile(fp);
     }
-    TEST_ASSERT_TRUE(hexParse(hexLineRead));
+    hexParse(hexLineRead,flashMemory);
     TEST_FAIL_MESSAGE("Expect ERR_UNKNOWN_RECORD_TYPE. But no exception thrown.");
   }
   Catch(e)
