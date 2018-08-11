@@ -11,8 +11,9 @@
 
 uint8_t flashMemory[256*k];//256*1024
 
-
-void setUp(void){}
+void setUp(void){
+  initHexParser();
+}
 
 void tearDown(void){}
 /*
@@ -524,6 +525,40 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
   {
     printf(e->errorMsg);
     TEST_ASSERT_EQUAL(ERR_UNKNOWN_RECORD_TYPE, e->errorCode);
+    freeError(e);
+  }
+
+}
+
+void test_readFile_read_invalid_hex_line__after_eof_from_hex_file_and_throw_ERR_INVALID_INSTRUCTION_AFTER_EOF(void)
+{
+  /**--------------testErrorRecordType.hex----------------
+   *:10C00000576F77212044696420796F7520726561CC
+   *:10C010006C6C7920676F207468726F756768206137
+   *:10C020006C6C20746869732074726F75626C652023
+   *:10C03000746F207265616420746869732073747210
+   *:00000001FF
+   *:04C040007696E673FF
+   */
+  CEXCEPTION_T e;
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("data/test/testErrorInvalidInstructionAfterEOF.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+  Try{
+    while((hexLineRead = readFile(fp)) != NULL)
+    {
+      hexParse(hexLineRead,flashMemory);
+    }
+    TEST_FAIL_MESSAGE("Expect ERR_INVALID_INSTRUCTION_AFTER_EOF. But no exception thrown.");
+  }
+  Catch(e)
+  {
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_INVALID_INSTRUCTION_AFTER_EOF, e->errorCode);
     freeError(e);
   }
 

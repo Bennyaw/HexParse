@@ -6,36 +6,43 @@
 #include "CException.h"
 
 AvrOperator avrOperatorTable[256] = {
+  [0x00] = nop,
+  [0x01] = NULL,
+  [0x02] = muls,
+  [0x03] = mulsu,
+  [0x04 ... 0x07] = cpc,
+  [0x08 ... 0x0b] = sbc,
   [0x0c ... 0x0f] = add,
+  [0x10 ... 0x13] = cpse,
+  [0x14 ... 0x17] = cp,
+  [0x18 ... 0x1b] = sub,
   [0x1c ... 0x1f] = adc,
   [0x20 ... 0x23] = and,
-  [0x70 ... 0x7f] = andi,
-  [0x96] = adiw,
-  [0x18 ... 0x1b] = sub,
-  [0x50 ... 0x5f] = subi,
-  [0x08 ... 0x0b] = sbc,
-  [0x40 ... 0x4f] = sbci,
-  [0x97] = sbiw,
-  [0x28] = or,
-  [0x60 ... 0x6f] = ori,
   [0x24 ... 0x27] = eor,
-  [0xef] = ser,
-  [0x9c ... 0x9f] = mul,
-  [0x02] = muls,
-  [0x94 ... 0x95] = instructionWith1001010,
-  [0xfa ... 0xfb] = bst,
-  [0xf8 ... 0xf9] = bld,
-  [0x03] = mulsu,
+  [0x28] = or,
+  [0x29 ... 0x2b] = NULL,
   [0x2c ... 0x2f] = mov,
+  [0x30 ... 0x3f] = cpi,
+  [0x40 ... 0x4f] = sbci,
+  [0x50 ... 0x5f] = subi,
+  [0x60 ... 0x6f] = ori,
+  [0x70 ... 0x7f] = andi,
+  [0x80 ... 0x8f] = NULL,
+  [0x90 ... 0x93] = NULL,
+  [0x94 ... 0x95] = instructionWith1001010,
+  [0x96] = adiw,
+  [0x97] = sbiw,
+  [0x98 ... 0x9b] = NULL,
+  [0x9c ... 0x9f] = mul,
+  [0xa0 ... 0xbf] = NULL,
   [0xc0 ... 0xcf] = rjmp,
+  [0xd0 ... 0xdf] = NULL,
+  [0xe0 ... 0xef] = ldi,
   [0xf0 ... 0xf3] = brbs,
   [0xf4 ... 0xf7] = brbc,
-  [0x00] = nop,
-  [0x14 ... 0x17] = cp,
-  [0x04 ... 0x07] = cpc,
-  [0x30 ... 0x3f] = cpi,
-  //[0x10 ... 0x13] = cpse,
-  [0xe0 ... 0xef] = ldi,
+  [0xf8 ... 0xf9] = bld,
+  [0xfa ... 0xfb] = bst,
+  [0xfc ... 0xff] = NULL,
 };
 
 AvrOperator avr10010100Table[16] = {
@@ -43,12 +50,16 @@ AvrOperator avr10010100Table[16] = {
   [0x1] = neg,
   [0x2] = swap,
   [0x3] = inc,
+  [0x4] = NULL,
   [0x5] = asr,
   [0x6] = lsr,
   [0x7] = ror,
   [0x8] = instructionWith10010100,
+  [0x9] = NULL,
   [0xa] = dec,
-  [0xc] = jmp, jmp,
+  [0xb] = NULL,
+  [0xc ... 0xd] = jmp,
+  [0xe ... 0xf] = NULL,
   //[0xe] = call, call,
 };
 
@@ -57,6 +68,7 @@ AvrOperator avr10010101Table[16] = {
   [0x1] = neg,
   [0x2] = swap,
   [0x3] = inc,
+  [0x4] = NULL,
   [0x5] = asr,
   [0x6] = lsr,
   [0x7] = ror,
@@ -138,13 +150,13 @@ void substractStackPointer(int value)
   *(uint16_t *)spl -= 2;
 }
 
-void push(uint16_t data)
+void pushWord(uint16_t data)
 {
   *spRegPtr = data;
   substractStackPointer(2);
 }
 
-void pop()
+uint16_t popWord()
 {
   substractStackPointer(-2);
   return *spRegPtr;
@@ -155,20 +167,21 @@ void initSimulator()
   *spRegPtr = 0x8ff;
 }
 
-/*int is2wordInstruction(uint8_t *codePtr)
+int is2wordInstruction(uint8_t *codePtr)
 {
-  uint16_t sts, first4bit;
   codePtr + 2;
 
-  result = *(uint16_t *)codePtr &
-
-
-
-  if(sts(codePtr) | jmp(codePtr) | call(codePtr))
-    return 1;
+  if(*(uint16_t *)codePtr & 0xf000 == 0x9000)
+  {
+    if(*(uint16_t *)codePtr & 0x0e00 == 0x400 || *(uint16_t *)codePtr & 0x0e00 == 0x200)
+    {
+      if(*(uint16_t *)codePtr & 0xf == 0x0 || *(uint16_t *)codePtr & 0xe == 0xc || *(uint16_t *)codePtr & 0xe == 0xe)
+        return 1;
+    }
+  }
   else
     return 0;
-}*/
+}
 
 /**
  * Z:
@@ -734,7 +747,7 @@ int add(uint8_t *codePtr)
 
   r[rd] = r[rd] + r[rr];
   handleStatusRegForAddAdcOperation(rd, rr, r[rd]);
-  return 0;
+  return 2;
 }
 
 /**
@@ -2195,5 +2208,33 @@ int ldi(uint8_t *codePtr)
 	k  = ((codePtr[1] & 0xf) << 4) | (codePtr[0] & 0xf);
 
 	r[rd] = k;
-	return 0;
+	return 2;
+}
+
+/**
+ * Instruction:
+ * 		CPSE Rd, Rr
+ *			0001 00rd dddd rrrr
+ * where
+ *			0 <= ddddd <= 31
+ *      0 <= rrrrr <= 31
+ * PC <- PC + 2, Skip a one word instruction
+ * PC <- PC + 3, Skip a two word instruction
+ */
+int cpse(uint8_t *codePtr)
+{
+	uint8_t rd, rr;
+
+	rd = ((codePtr[1] & 0x1) << 4) | ((codePtr[0] & 0xf0) >> 4);
+	rr = ((codePtr[1] & 0x2) << 3) | (codePtr[0] & 0xf);
+
+	if(r[rd] == r[rr])
+  {
+    if(is2wordInstruction(codePtr))
+      return 6;
+    else
+      return 4;
+  }
+  else
+    return 2;
 }

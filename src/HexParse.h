@@ -13,6 +13,7 @@ struct HexRecordStructure{
 
 char *readFile(FILE *fileLocation);
 int openFile(void);
+void initHexParser(void);
 int getByteCount(char **linePtr);
 int checkColon(char **linePtr);
 int extractAddress (char **linePtr);

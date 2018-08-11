@@ -33,6 +33,13 @@ void test_HexParseAndSimulator_add_r16_r17_(void)
   *:00000001FF
   *-----------------------------*/
 
+  /**--------simulate -----------
+   *                opcode
+   * ldi r16 $2     E0 02
+   * ldi r17 $4     E0 14
+   * add r16,r17    0F 01
+   * break          95 98
+   */
 
   CEXCEPTION_T e;
   FILE *fp;

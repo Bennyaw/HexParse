@@ -17,7 +17,7 @@ uint32_t linearAddress;
 uint32_t start32BitAddress;
 int enableSegmentAddress = 0;
 int enableLinearAddress = 0;
-
+int endOfLineFlag = 0;
 /*    all printf is to debug code, for checing purpose  */
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
@@ -80,6 +80,11 @@ char *readFile(FILE *fileLocation)
 //----------------------------------------------------------
 
 //-------------functions for analyzing hex line-------------
+void initHexParser(void)
+{
+  endOfLineFlag = 0;
+}
+
 int checkColon(char **linePtr)
 {
   if(**linePtr == ':')
@@ -247,6 +252,16 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
 //---------------------main function--------------------------
 void hexParse(char *linePtr, uint8_t *flashMemory)
 {
+  if(endOfLineFlag == 1)//throw error
+  {
+    endOfLineFlag = 0;//reset flag
+    throwError(ERR_INVALID_INSTRUCTION_AFTER_EOF,"Error : Invalid instruction after end of file.");
+  }
+  else
+  {
+    endOfLineFlag = 0;
+  }
+
   HexRecordStructure HexRecordStructure;
   char *ptrForVerify = linePtr;
   uint32_t tempAddress;
@@ -254,6 +269,7 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
 
   if (verifyHexLine(&ptrForVerify))//error thrown inside verifyHexLine function
   {
+
     while(*linePtr == ':')
     {
       linePtr++;//move pointer to address field
@@ -278,9 +294,9 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
   }
   else if(HexRecordStructure.recordType == 1)
   {
-    enableLinearAddress = 0;
     enableSegmentAddress = 0;
-    exit -1;
+    enableLinearAddress = 0;
+    endOfLineFlag = 1;
   }
   else if(HexRecordStructure.recordType == 3 || HexRecordStructure.recordType == 5)
   {
@@ -294,10 +310,6 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
     loadData(linePtr,HexRecordStructure,flashMemory);
   }
 
-  }
-  else
-  {
-    exit -1;
   }
 }
 
@@ -320,6 +332,7 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flas
       power--;  //decrement power
       count++;
     }
+
 
     if(enableSegmentAddress == 1)
     {
