@@ -1,0 +1,3 @@
+[submodule "AvrSimulator"]
+	path = AvrSimulator
+	url = https://github.com/PEKMUN/AvrSimulator.git

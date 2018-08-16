@@ -7,7 +7,7 @@ typedef enum{
   ERR_UNKNOWN_DATA,
   ERR_UNKNOWN_RECORD_TYPE,
   ERR_INVALID_INSTRUCTION_AFTER_EOF,
-} ErrorCode;
+} Errorcode;
 
 
 #endif // _TESTPARSER_H

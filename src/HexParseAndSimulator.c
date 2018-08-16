@@ -12,11 +12,13 @@
 #include "HexParseAndSimulator.h"
 #include "Simulator.h"
 #include "Error.h"
+#include "ErrorSimulator.h"
 
 void simulate(uint8_t *codePtr)
 {
   while(1)
   {
     codePtr += simulateOneInstruction(codePtr);
+    printf("address : \n",codePtr );
   }
 }

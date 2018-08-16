@@ -106,7 +106,7 @@ int getByteCount(char **linePtr)
 
   while(count<2)
   {
-    base = (int)pow((double)16,power);  //16^1
+    base = (int)pow((double)16,power);  //start with 16^1
     decimal = convertHexToDec(linePtr, decimal, power, base);
     power--; //decrement power
     count++;
