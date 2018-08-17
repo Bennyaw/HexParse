@@ -99,6 +99,21 @@ void test_readFile_read_every_hex_line_from_hex_file(void)
   }
 }
 
+void test_readFile_from_non_existing_file_and_print_error_msg(void)
+{
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("data/test/noThisFile.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  while((hexLineRead = readFile(fp)) != NULL)
+  {
+    printf("In test function : %s\n", hexLineRead);
+  }
+}
 /*------------test for code working properly-----------------*/
 
 void test_checkColon_check_for_colon_sign_return_true(void){
@@ -209,7 +224,7 @@ void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
   }
 }
 //successfully working test , cancel out because of assmbler.hex file is modified and used in different test.
-void xtest_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_true(void)
+void test_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_true(void)
 {
   /**----------------assemblerApp.hex------------------
    *:020000022BC011
@@ -224,7 +239,7 @@ void xtest_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_
   uint8_t *verifyData;
   FILE *fp;
   char *hexLineRead;
-  fp = fopen("data/test/assemblerApp.hex","r");
+  fp = fopen("data/test/assemblerAppSeg.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");

@@ -337,21 +337,21 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flas
     if(enableSegmentAddress == 1)
     {
       flashMemory[segmentAddress + HexRecordStructure.address] = data;//load data in to memory
-      printf("flashMemory[%x] = %x\n",segmentAddress + HexRecordStructure.address,data);
+      //printf("flashMemory[%x] = %x\n",segmentAddress + HexRecordStructure.address,data);
       HexRecordStructure.address++;
       byteCount--;
     }
     else if(enableLinearAddress == 1)
     {
       flashMemory[linearAddress + HexRecordStructure.address] = data;//load data in to memory
-      printf("flashMemory[%x] = %x\n",linearAddress + HexRecordStructure.address,data);
+      //printf("flashMemory[%x] = %x\n",linearAddress + HexRecordStructure.address,data);
       HexRecordStructure.address++;
       byteCount--;
     }
     else
     {
       flashMemory[HexRecordStructure.address] = data;//load data in to memory
-      printf("flashMemory[%x] = %x\n",HexRecordStructure.address,data);
+      //printf("flashMemory[%x] = %x\n",HexRecordStructure.address,data);
       HexRecordStructure.address++;
       byteCount--;
     }

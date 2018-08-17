@@ -222,7 +222,7 @@ tableend:
 .db	76,48
 
  */
-void test_HexParseAndSimulator_bubblesort(void)
+void xtest_HexParseAndSimulator_bubblesort(void)
 {
   CEXCEPTION_T e;
   FILE *fp;
