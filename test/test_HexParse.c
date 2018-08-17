@@ -23,17 +23,17 @@ void test_openFile()
 }
 */
 
+/*--------------exampleHex.hex----------------
+*:10C00000576F77212044696420796F7520726561CC
+*:10C010006C6C7920676F207468726F756768206137
+*:10C020006C6C20746869732074726F75626C652023
+*:10C03000746F207265616420746869732073747210
+*:04C040007696E673FF
+*:00000001FF
+*/
+   
 void test_readFile(void)
 {
-  /*--------------exampleHex.hex----------------
-   *:10C00000576F77212044696420796F7520726561CC
-   *:10C010006C6C7920676F207468726F756768206137
-   *:10C020006C6C20746869732074726F75626C652023
-   *:10C03000746F207265616420746869732073747210
-   *:04C040007696E673FF
-   *:00000001FF
-   */
-
   FILE *fp;
   char *hexLineRead;
   fp = fopen("data/test/exampleHex.hex","r");
@@ -49,15 +49,6 @@ void test_readFile(void)
 
 void test_readFile_read_3rd_hex_line_from_hex_file(void)
 {
-  /*--------------exampleHex.hex----------------
-   *:10C00000576F77212044696420796F7520726561CC
-   *:10C010006C6C7920676F207468726F756768206137
-   *:10C020006C6C20746869732074726F75626C652023
-   *:10C03000746F207265616420746869732073747210
-   *:04C040007696E673FF
-   *:00000001FF
-   */
-
   FILE *fp;
   char *hexLineRead;
   fp = fopen("data/test/exampleHex.hex","r");
@@ -76,15 +67,6 @@ void test_readFile_read_3rd_hex_line_from_hex_file(void)
 
 void test_readFile_read_every_hex_line_from_hex_file(void)
 {
-  /*--------------exampleHex.hex----------------
-   *:10C00000576F77212044696420796F7520726561CC
-   *:10C010006C6C7920676F207468726F756768206137
-   *:10C020006C6C20746869732074726F75626C652023
-   *:10C03000746F207265616420746869732073747210
-   *:04C040007696E673FF
-   *:00000001FF
-   */
-
   FILE *fp;
   char *hexLineRead;
   fp = fopen("data/test/exampleHex.hex","r");
@@ -172,15 +154,7 @@ void test_hexParse_read_1st_hex_line_from_file_and_extract_data_correctly(void)
     0x57, 0x6f, 0x77, 0x21, 0x20, 0x44, 0x69, 0x64,
     0x20, 0x79, 0x6F, 0x75, 0x20, 0x72, 0x65, 0x61
     };
-  /*--------------exampleHex.hex----------------
-   *:10C00000576F77212044696420796F7520726561CC
-   *:10C010006C6C7920676F207468726F756768206137
-   *:10C020006C6C20746869732074726F75626C652023
-   *:10C03000746F207265616420746869732073747210
-   *:04C040007696E673FF
-   *:00000001FF
-   */
-
+	
   FILE *fp;
   char *hexLineRead;
   fp = fopen("data/test/exampleHex.hex","r");
@@ -223,7 +197,7 @@ void test_hexParse_read_all_hex_line_from_file_and_return_true(void)
     i++;
   }
 }
-//successfully working test , cancel out because of assmbler.hex file is modified and used in different test.
+
 void test_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_true(void)
 {
   /**----------------assemblerApp.hex------------------
@@ -547,7 +521,7 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
 
 void test_readFile_read_invalid_hex_line__after_eof_from_hex_file_and_throw_ERR_INVALID_INSTRUCTION_AFTER_EOF(void)
 {
-  /**--------------testErrorRecordType.hex----------------
+  /**--------------testErrorInvalidInstructionAfterEOF.hex----------------
    *:10C00000576F77212044696420796F7520726561CC
    *:10C010006C6C7920676F207468726F756768206137
    *:10C020006C6C20746869732074726F75626C652023
@@ -574,6 +548,37 @@ void test_readFile_read_invalid_hex_line__after_eof_from_hex_file_and_throw_ERR_
   {
     printf(e->errorMsg);
     TEST_ASSERT_EQUAL(ERR_INVALID_INSTRUCTION_AFTER_EOF, e->errorCode);
+    freeError(e);
+  }
+
+}
+
+void test_readFile_read_not_not_equal_number_data_and_throw_ERR_NUMBER_OF_DATA_MISMATCHED(void)
+{
+  /**--------------testErrorInvalidInstructionAfterEOF.hex----------------
+   *:02000004000301F6
+   *:1012340054686973207061727420697320696E2028
+   *:00000001FF
+   */
+  CEXCEPTION_T e;
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen("data/test/testNumberOfData.hex","r");
+
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+  Try{
+    while((hexLineRead = readFile(fp)) != NULL)
+    {
+      hexParse(hexLineRead,flashMemory);
+    }
+    TEST_FAIL_MESSAGE("Expect ERR_NUMBER_OF_DATA_MISMATCHED. But no exception thrown.");
+  }
+  Catch(e)
+  {
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_NUMBER_OF_DATA_MISMATCHED, e->errorCode);
     freeError(e);
   }
 

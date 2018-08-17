@@ -260,7 +260,8 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
   char *ptrForVerify = linePtr;
   uint32_t tempAddress;
   uint32_t tempAddress2;
-
+	int counter = 0;
+	
   if (verifyHexLine(&ptrForVerify))//error thrown inside verifyHexLine function
   {
 
@@ -272,46 +273,62 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
     HexRecordStructure.byteCount = getByteCount(&linePtr);//error thrown in the function
     HexRecordStructure.address = extractAddress(&linePtr);//error thrown in the function
     HexRecordStructure.recordType = extractRecordType(&linePtr);//error thrown in the function
+		counter = (HexRecordStructure.byteCount*2) + 2;
 // linePtr now is pointing to data field
 
-  if(HexRecordStructure.recordType == 2)
-  {
-    enableSegmentAddress = 1;
-    enableLinearAddress = 0;
-    segmentAddress = extractAddress(&linePtr) * 0x10;//extended segment address is recorded in data field
-  }
-  else if(HexRecordStructure.recordType == 4)
-  {
-    enableSegmentAddress = 0;
-    enableLinearAddress = 1;
-    linearAddress = extractAddress(&linePtr) * 0x10000;//extended linear address is recorded in data field
-  }
-  else if(HexRecordStructure.recordType == 1)
-  {
-    enableSegmentAddress = 0;
-    enableLinearAddress = 0;
-    endOfLineFlag = 1;
-  }
-  else if(HexRecordStructure.recordType == 3 || HexRecordStructure.recordType == 5)
-  {
-    tempAddress = extractAddress(&linePtr) * 0x10000;
-    tempAddress2 = extractAddress(&linePtr);
-    start32BitAddress = tempAddress + tempAddress2;//extract 32 bit address and save it in global variable
-    printf("32BitAddress : %x\n", start32BitAddress);
-  }
-  else
-  {
-    loadData(linePtr,HexRecordStructure,flashMemory);
-  }
+		if(HexRecordStructure.recordType == 2)
+		{
+			enableSegmentAddress = 1;
+			enableLinearAddress = 0;
+			segmentAddress = extractAddress(&linePtr) * 0x10;//extended segment address is recorded in data field
+			counter = 2;//set for checking ERR_NUMBER_OF_DATA_MISMATCHED
+		}
+		else if(HexRecordStructure.recordType == 4)
+		{
+			enableSegmentAddress = 0;
+			enableLinearAddress = 1;
+			linearAddress = extractAddress(&linePtr) * 0x10000;//extended linear address is recorded in data field
+			counter = 2;//set for checking ERR_NUMBER_OF_DATA_MISMATCHED
+		}
+		else if(HexRecordStructure.recordType == 1)
+		{
+			enableSegmentAddress = 0;
+			enableLinearAddress = 0;
+			endOfLineFlag = 1;
+			counter = 2;//set for checking ERR_NUMBER_OF_DATA_MISMATCHED
+		}
+		else if(HexRecordStructure.recordType == 3 || HexRecordStructure.recordType == 5)
+		{
+			tempAddress = extractAddress(&linePtr) * 0x10000;
+			tempAddress2 = extractAddress(&linePtr);
+			start32BitAddress = tempAddress + tempAddress2;//extract 32 bit address and save it in global variable
+			counter = 2;//set for checking ERR_NUMBER_OF_DATA_MISMATCHED
+			//printf("32BitAddress : %x\n", start32BitAddress);
+		}
+		else
+		{
+			loadData(linePtr,HexRecordStructure,flashMemory);
+		}
 
   }
+	
+	while(counter != 0)//move 1 byte to check whether is end of line
+	{									 
+		linePtr++;
+		counter--;
+	}
+	
+	if(*linePtr != '\0')
+	{
+		throwError(ERR_NUMBER_OF_DATA_MISMATCHED,"Error : Expected number of data bytes mismatch with actual number of bytes.");
+	}
 }
 
 void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flashMemory)
 {
 
-  int byteCount = HexRecordStructure.byteCount;//for loading every two bytes in to memory
-
+  int byteCount = HexRecordStructure.byteCount;
+	
   while(byteCount!=0)
   {
     int count = 0;
@@ -349,7 +366,7 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flas
       HexRecordStructure.address++;
       byteCount--;
     }
-
   }
 
+	
 }
