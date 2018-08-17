@@ -17,7 +17,7 @@
     - test:all
 
 :release_build:
-  :output: HexParseAndSimulator.exe
+      :output: simulate.exe
 #  :use_assembly: FALSE
 
 :environment:
@@ -52,6 +52,9 @@
   :test_preprocess:
     - *common_defines
     - TEST
+  :source:
+    - CEXCEPTION_USE_CONFIG_FILE
+    - _ISOC99_SOURCE
 
 :cmock:
   :mock_prefix: mock_

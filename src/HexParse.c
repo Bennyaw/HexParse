@@ -18,6 +18,7 @@ uint32_t start32BitAddress;
 int enableSegmentAddress = 0;
 int enableLinearAddress = 0;
 int endOfLineFlag = 0;
+
 /*    all printf is to debug code, for checing purpose  */
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
@@ -80,7 +81,7 @@ char *readFile(FILE *fileLocation)
 //----------------------------------------------------------
 
 //-------------functions for analyzing hex line-------------
-void initHexParser(void)
+void initHexParser(void)//for initialisation
 {
   endOfLineFlag = 0;
 }
@@ -186,28 +187,21 @@ int verifyHexLine(char **linePtr)
   uint16_t getData = 0,addData = 0;
   uint8_t  verifyData;
 
-  if(checkColon(linePtr))
+  if(checkColon(linePtr))//if got error, thrown inside function
   {
     while(**linePtr == ':')
     {
       (*linePtr)++;
     }
 
-    while(**linePtr != ':')//loop until next hexline
+    while(**linePtr != '\0')//loop until the end of line
     {
-      if(**linePtr == '\0')//check whether reach end of line
-      {
-        break;
-      }
-      else
-      {
-        getData = getByteCount(linePtr);//get 2 byte count
-        addData += getData ; //keep adding untill last hex digit
-      }
+        addData += getByteCount(linePtr) ; //keep adding untill last hex digit
     }
 
-    //printf("verifyData(non-zero means error data) : %u\n", verifyData);//checking hex digit whether is 00
+    //printf("verifyData(non-zero means error data) : %u\n", verifyData);
 
+    //masking off every hexdigit except for last 2 hexdigit and check whether is 0
     if((addData & 0xff) == 0)//if not zero then is error data
     {
       return 1;
@@ -249,7 +243,7 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
   return decimal;
 }
 
-//---------------------main function--------------------------
+//============================main function==================================
 void hexParse(char *linePtr, uint8_t *flashMemory)
 {
   if(endOfLineFlag == 1)//throw error

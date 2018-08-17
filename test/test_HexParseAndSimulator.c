@@ -11,7 +11,6 @@
 #include "HexParse.h"
 #include "HexParseAndSimulator.h"
 #include "Simulator.h"
-#include "Error.h"
 #include "ErrorSimulator.h"
 
 #define k 1024
@@ -28,21 +27,21 @@ void tearDown(void)
 {
 }
 
-void test_HexParseAndSimulator_add_r16_r17_(void)
-{
- /*-----oooooo.hex---------------
-  *:020000020000FC
-  *:0800000002E014E0010F9895E5
-  *:00000001FF
-  *-----------------------------*/
+/*-----oooooo.hex---------------
+ *:020000020000FC
+ *:0800000002E014E0010F9895E5
+ *:00000001FF
+ *-----------------------------*/
 
-  /**--------simulate -----------
-   *                opcode
-   * ldi r16 $2     E0 02
-   * ldi r17 $4     E0 14
-   * add r16,r17    0F 01
-   * break          95 98
-   */
+ /**--------simulate -----------
+  *                opcode
+  * ldi r16 $2     E0 02
+  * ldi r17 $4     E0 14
+  * add r16,r17    0F 01
+  * break          95 98
+  */
+void test_HexParseAndSimulator_add_r16_r17_(void){
+
 
   CEXCEPTION_T e;
   FILE *fp;
@@ -62,7 +61,7 @@ void test_HexParseAndSimulator_add_r16_r17_(void)
   r[17] = 4;
 
  Try{
-   simulate(flashMemory);
+//   simulate(flashMemory);
    TEST_FAIL_MESSAGE("Expect Break exception. But no exception thrown.");
  }
  Catch(e){
@@ -222,7 +221,22 @@ tableend:
 .db	76,48
 
  */
-void xtest_HexParseAndSimulator_bubblesort(void)
+
+
+/*---------testBubbleSort.hex--------------
+:020000020000FC
+:100000000EC0E12FF22FF02ED080E290DE1410F01F
+:10001000D082E182FA94C1F70A9599F708950FEF1B
+:100020000DBF08E00EBFFF27E1E8CCE9D0E0C8959E
+:100030000A923197C036D9F7D030C9F71BE920E0D2
+:100040000BE3DFDF989578C44ED84E642B27F12B55
+:100050003EAC6D4530B8D7E73F85D808797EBC62A5
+:10006000A8CD9DAC6CE950FFFC66C600ABEF6B728F
+:10007000ACAA112D2A3722AEE5FA0CB3BBF32CE75C
+:020080004C3002
+:00000001FF
+*/
+void test_HexParseAndSimulator_bubblesort(void)
 {
   CEXCEPTION_T e;
   FILE *fp;
@@ -247,7 +261,7 @@ void xtest_HexParseAndSimulator_bubblesort(void)
   };
 
  Try{
-   simulate(flashMemory);
+//   simulate(flashMemory);
    TEST_FAIL_MESSAGE("Expect Break exception. But no exception thrown.");
  }
  Catch(e){

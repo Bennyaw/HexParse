@@ -10,4 +10,4 @@ typedef enum{
 } Errorcode;
 
 
-#endif // _TESTPARSER_H
+#endif // _ERROR_H
