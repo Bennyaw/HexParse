@@ -31,7 +31,7 @@ void test_openFile()
 *:04C040007696E673FF
 *:00000001FF
 */
-   
+
 void test_readFile(void)
 {
   FILE *fp;
@@ -154,7 +154,7 @@ void test_hexParse_read_1st_hex_line_from_file_and_extract_data_correctly(void)
     0x57, 0x6f, 0x77, 0x21, 0x20, 0x44, 0x69, 0x64,
     0x20, 0x79, 0x6F, 0x75, 0x20, 0x72, 0x65, 0x61
     };
-	
+
   FILE *fp;
   char *hexLineRead;
   fp = fopen("data/test/exampleHex.hex","r");
@@ -342,6 +342,22 @@ void test_verifyHexLine_with_space_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
 {
   CEXCEPTION_T e;
   char *line = ":1001000021460 360121470136007EFE09D2190140";
+
+  Try{
+    verifyHexLine(&line);
+    TEST_FAIL_MESSAGE("Expect ERR_UNKNOWN_DATA. But no exception thrown.");
+  }
+  Catch(e){
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_UNKNOWN_DATA, e->errorCode);
+    freeError(e);
+  }
+}
+
+void test_verifyHexLine_with_double_colon_in_hex_line_and_throw_ERR_UNKNOWN_DATA(void)
+{
+  CEXCEPTION_T e;
+  char *line = ":：1001000021460360121470136007EFE09D2190140";
 
   Try{
     verifyHexLine(&line);

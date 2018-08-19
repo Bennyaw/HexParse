@@ -90,6 +90,7 @@ int checkColon(char **linePtr)
 {
   if(**linePtr == ':')
   {
+    (*linePtr)++;
     return 1;
   }
   else
@@ -189,10 +190,6 @@ int verifyHexLine(char **linePtr)
 
   if(checkColon(linePtr))//if got error, thrown inside function
   {
-    while(**linePtr == ':')
-    {
-      (*linePtr)++;
-    }
 
     while(**linePtr != '\0')//loop until the end of line
     {
@@ -261,7 +258,7 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
   uint32_t tempAddress;
   uint32_t tempAddress2;
 	int counter = 0;
-	
+
   if (verifyHexLine(&ptrForVerify))//error thrown inside verifyHexLine function
   {
 
@@ -311,13 +308,13 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
 		}
 
   }
-	
+
 	while(counter != 0)//move 1 byte to check whether is end of line
-	{									 
+	{
 		linePtr++;
 		counter--;
 	}
-	
+
 	if(*linePtr != '\0')
 	{
 		throwError(ERR_NUMBER_OF_DATA_MISMATCHED,"Error : Expected number of data bytes mismatch with actual number of bytes.");
@@ -328,7 +325,7 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flas
 {
 
   int byteCount = HexRecordStructure.byteCount;
-	
+
   while(byteCount!=0)
   {
     int count = 0;
@@ -368,5 +365,5 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flas
     }
   }
 
-	
+
 }
