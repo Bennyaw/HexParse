@@ -261,7 +261,7 @@ void test_HexParseAndSimulator_bubblesort(void)
   };
 
  Try{
-//   simulate(flashMemory);
+   simulate(flashMemory);
    TEST_FAIL_MESSAGE("Expect Break exception. But no exception thrown.");
  }
  Catch(e){
