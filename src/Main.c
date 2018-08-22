@@ -37,7 +37,7 @@ int main(void)
   {
     hexParse(hexLineRead,flashMemory);
   }
-
+  uint8_t sram[] = {0};
    Try{
      simulate(flashMemory);
    } Catch(e){
