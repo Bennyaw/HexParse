@@ -47,7 +47,7 @@ void simulate(uint8_t *codePtr)
         printf("R20=0x%02x R21=0x%02x R22=0x%02x R23=0x%02x R24=0x%02x "
                "R25=0x%02x R26=0x%02x R27=0x%02x R28=0x%02x R29=0x%02x \n",
                 r[20], r[21], r[22], r[23], r[24], r[25], r[26], r[27], r[28], r[29]);
-        printf("R30=0x%02x R31=0x%02x SREG=0x%02x\n", r[30], r[31], *sreg);		  
+        printf("R30=0x%02x R31=0x%02x SREG=0x%02x sram[0x9b]=0x%02x\n", r[30], r[31], *sreg, sram[0x9b]);		  
       }
       else
       {
@@ -61,7 +61,7 @@ void simulate(uint8_t *codePtr)
         printf("R20=0x%02x R21=0x%02x R22=0x%02x R23=0x%02x R24=0x%02x "
                "R25=0x%02x R26=0x%02x R27=0x%02x R28=0x%02x R29=0x%02x \n",
                 r[20], r[21], r[22], r[23], r[24], r[25], r[26], r[27], r[28], r[29]);
-        printf("R30=0x%02x R31=0x%02x SREG=0x%02x\n", r[30], r[31], *sreg);
+        printf("R30=0x%02x R31=0x%02x SREG=0x%02x sram[0x9b]=0x%02x\n", r[30], r[31], *sreg, sram[0x9b]);
       }
 
       codePtr += incr;
