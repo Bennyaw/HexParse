@@ -20,6 +20,7 @@
 
 void simulate(uint8_t *codePtr)
 {
+  uint32_t i = 0;
   int incr;
   char ch;
 
@@ -36,7 +37,7 @@ void simulate(uint8_t *codePtr)
     {
       if(incr == 4)
       {
-        printf("0x%08x(0x%08x)\t\t\t0x%08x\n",getPc(codePtr), getPc(codePtr)/2,*(uint32_t*)codePtr);
+        printf("0x%08x(0x%08x)\t\t\t0x%08x\t(step=%d)\n",getPc(codePtr), getPc(codePtr)/2,*(uint32_t*)codePtr, i);
         printf("R0 =0x%02x R1 =0x%02x R2 =0x%02x R3 =0x%02x R4 =0x%02x "
                "R5 =0x%02x R6 =0x%02x R7 =0x%02x R8 =0x%02x R9 =0x%02x \n",
                 r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9]);
@@ -50,7 +51,7 @@ void simulate(uint8_t *codePtr)
       }
       else
       {
-        printf("0x%08x(0x%08x)\t\t\t0x%04x\n",getPc(codePtr), getPc(codePtr)/2,*(uint16_t*)codePtr);
+        printf("0x%08x(0x%08x)\t\t\t0x%04x\t(step=%d)\n",getPc(codePtr), getPc(codePtr)/2,*(uint16_t*)codePtr, i);
         printf("R0 =0x%02x R1 =0x%02x R2 =0x%02x R3 =0x%02x R4 =0x%02x "
                "R5 =0x%02x R6 =0x%02x R7 =0x%02x R8 =0x%02x R9 =0x%02x \n",
                 r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9]);
@@ -64,6 +65,7 @@ void simulate(uint8_t *codePtr)
       }
 
       codePtr += incr;
+      i++;
     }
   }
 }
