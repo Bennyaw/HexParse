@@ -27,7 +27,7 @@
 
 .equ	SIZE	=60		;data block size
 .equ	TABLE_L	=$60		;Low SRAM address of first data element
-.equ	TABLE_H	=$00		;High SRAM address of first data element
+.equ	TABLE_H	=$02		;High SRAM address of first data element
 
 	rjmp	RESET		;Reset Handle
 
@@ -95,6 +95,13 @@ RESET:
 .def	temp	=r16
 
 ;***** Code
+;	ldi		r16, $21	
+;	mov		r0, r16
+;	ldi		r17, $10
+;	mov		r28, r17
+;	clr		r29
+;	inc     r29
+;	st		-Y, r0
 
 	ldi	temp,low(RAMEND)
 	out	SPL,temp
@@ -104,27 +111,31 @@ RESET:
 ;***** Memory fill
 	
 	clr	ZH
-	ldi	ZL,tableend*2+1	;Z-pointer <- ROM table end + 1
+	ldi	ZL,tableend*2+1			;Z-pointer <- ROM table end + 1
 	ldi	YL,low(256*TABLE_H+TABLE_L+SIZE)
 	ldi	YH,high(256*TABLE_H+TABLE_L+SIZE)	
-				;Y pointer <- SRAM table end + 1
-loop:	lpm			;get ROM constant
-	st	-Y,r0		;store in SRAM and decrement Y-pointer
-	sbiw	ZL,1		;decrement Z-pointer
-	cpi	YL,TABLE_L	;if not done
-	brne	loop		;    loop more
-	cpi	YH,TABLE_H
+								;Y pointer <- SRAM table end + 1
+loop:	
+	lpm							;get ROM constant
+;	sbiw	YH:YL, 1
+;	st		Y,r0				;store in SRAM and decrement Y-pointer
+	st		-Y,r0				;store in SRAM and decrement Y-pointer
+	sbiw	ZL,1				;decrement Z-pointer
+	cpi		YL,TABLE_L			;if not done
+	brne	loop				;    loop more
+	cpi		YH,TABLE_H
 	brne	loop
 
 ;***** Sort data
 
-sort:	ldi	endL,low(TABLE_H*256+TABLE_L+SIZE-1)
-	ldi	endH,high(TABLE_H*256+TABLE_L+SIZE-1)
-				;Z <- end of array address
-	ldi	cnt1,SIZE-1	;cnt1 <- size of array - 1
+sort:	
+	ldi		endL,low(TABLE_H*256+TABLE_L+SIZE-1)
+	ldi		endH,high(TABLE_H*256+TABLE_L+SIZE-1)
+								;Z <- end of array address
+	ldi		cnt1,SIZE-1			;cnt1 <- size of array - 1
 	rcall	bubble
 
-break
+	break
 
 
 

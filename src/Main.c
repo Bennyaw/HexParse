@@ -20,6 +20,7 @@ int main(void)
   FILE *fp;
   char *hexLineRead;
   fp = fopen("data/test/testBubbleSort.hex","r");
+  
   uint8_t expectedData[] ={
     255,252,250,243,241,239,233,231,231,229,
     216,216,215,205,198,196,188,187,184,179,
@@ -37,10 +38,14 @@ int main(void)
   {
     hexParse(hexLineRead,flashMemory);
   }
-  uint8_t sram[] = {0};
-   Try{
-     simulate(flashMemory);
-   } Catch(e){
-
+  
+  initialiseSram();
+  
+  Try{
+    simulate1(flashMemory);
+  } Catch(e){
+    dumpSram();
   }
+  dumpSram();
+  printf("done.\n");
 }
