@@ -25,11 +25,11 @@
 
 .include "m324pdef.inc"
 
-.equ	SIZE	=60		;data block size
+.equ	SIZE	= 4			;data block size
 .equ	TABLE_L	=$60		;Low SRAM address of first data element
 .equ	TABLE_H	=$02		;High SRAM address of first data element
 
-	rjmp	RESET		;Reset Handle
+	rjmp	RESET			;Reset Handle
 
 ;***************************************************************************
 ;*
@@ -63,18 +63,19 @@
 ;***** Code
 
 bubble:
-	mov	ZL,endL
-	mov	ZH,endH		;init Z pointer
-	mov	cnt2,cnt1	;counter2 <- counter1
-i_loop:	ld	A,Z		;get first byte, A (n)
-	ld	B,-Z		;decrement Z and get second byte, B (n-1)
-	cp	A,B		;compare A with B
-	brlo	L1		;if A not lower 
-	st	Z,A		;    store swapped
-	std	Z+1,B
-L1:	dec	cnt2
+	mov		ZL,endL
+	mov		ZH,endH		;init Z pointer
+	mov		cnt2,cnt1	;counter2 <- counter1
+i_loop:	
+	ld		A,Z			;get first byte, A (n)
+	ld		B,-Z		;decrement Z and get second byte, B (n-1)
+	cp		A,B			;compare A with B
+	brlo	L1			;if A not lower 
+	st		Z,A			;    store swapped
+	std		Z+1,B
+L1:	dec		cnt2
 	brne	i_loop		;end inner loop
-	dec	cnt1
+	dec		cnt1
 	brne	bubble		;end outer loop		
 	ret
 
@@ -95,30 +96,20 @@ RESET:
 .def	temp	=r16
 
 ;***** Code
-;	ldi		r16, $21	
-;	mov		r0, r16
-;	ldi		r17, $10
-;	mov		r28, r17
-;	clr		r29
-;	inc     r29
-;	st		-Y, r0
-
-	ldi	temp,low(RAMEND)
-	out	SPL,temp
-	ldi	temp,high(RAMEND)
-	out	SPH,temp	;init Stack Pointer
+	ldi		temp,low(RAMEND)
+	out		SPL,temp
+	ldi		temp,high(RAMEND)
+	out		SPH,temp			;init Stack Pointer
 
 ;***** Memory fill
 	
-	clr	ZH
-	ldi	ZL,tableend*2+1			;Z-pointer <- ROM table end + 1
-	ldi	YL,low(256*TABLE_H+TABLE_L+SIZE)
-	ldi	YH,high(256*TABLE_H+TABLE_L+SIZE)	
+	clr		ZH
+	ldi		ZL,tableend*2+1		;Z-pointer <- ROM table end + 1
+	ldi		YL,low(256*TABLE_H+TABLE_L+SIZE)
+	ldi		YH,high(256*TABLE_H+TABLE_L+SIZE)	
 								;Y pointer <- SRAM table end + 1
 loop:	
 	lpm							;get ROM constant
-;	sbiw	YH:YL, 1
-;	st		Y,r0				;store in SRAM and decrement Y-pointer
 	st		-Y,r0				;store in SRAM and decrement Y-pointer
 	sbiw	ZL,1				;decrement Z-pointer
 	cpi		YL,TABLE_L			;if not done
@@ -136,7 +127,8 @@ sort:
 	rcall	bubble
 
 	break
-
+forever:
+	rjmp	forever
 
 
 ;***** 60 ROM Constants

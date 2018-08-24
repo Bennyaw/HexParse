@@ -51,12 +51,13 @@ void test_readFile_read_3rd_hex_line_from_hex_file(void)
 {
   FILE *fp;
   char *hexLineRead;
+  int i;
   fp = fopen("data/test/exampleHex.hex","r");
 
   if(fp == NULL){
     perror("Error opening file");
   }
-  for(int i = 0; i < 3;i++)
+  for(i = 0; i < 3;i++)
   {
     hexLineRead = readFile(fp);
   }
@@ -477,6 +478,7 @@ void test_readFile_read_3rd_hex_line_from_hex_file_and_throw_ERR_COLON_MISSING(v
    */
   CEXCEPTION_T e;
   FILE *fp;
+  int i;
   char *hexLineRead;
   fp = fopen("data/test/testErrorColon.hex","r");
 
@@ -484,7 +486,7 @@ void test_readFile_read_3rd_hex_line_from_hex_file_and_throw_ERR_COLON_MISSING(v
     perror("Error opening file");
   }
   Try{
-    for(int i = 0; i < 3;i++)
+    for(i = 0; i < 3;i++)
     {
       hexLineRead = readFile(fp);
     }
@@ -512,6 +514,7 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
    */
   CEXCEPTION_T e;
   FILE *fp;
+  int i;
   char *hexLineRead;
   fp = fopen("data/test/testErrorRecordType.hex","r");
 
@@ -519,7 +522,7 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
     perror("Error opening file");
   }
   Try{
-    for(int i = 0; i < 2;i++)
+    for(i= 0; i < 2;i++)
     {
       hexLineRead = readFile(fp);
     }
