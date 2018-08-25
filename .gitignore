@@ -2,3 +2,5 @@ build/*
 !build/Readme.txt
 data/example/BubbleSort/BubbleSort/Debug/*
 !data/example/BubbleSort/BubbleSort/Debug/*.hex
+data/example/AvrCodeExercise/AvrCodeExercise/Debug/*
+!data/example/AvrCodeExercise/AvrCodeExercise/Debug/*.hex
