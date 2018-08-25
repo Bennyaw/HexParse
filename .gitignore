@@ -1,2 +1,4 @@
 build/*
 !build/Readme.txt
+data/example/BubbleSort/BubbleSort/Debug/*
+!data/example/BubbleSort/BubbleSort/Debug/*.hex
