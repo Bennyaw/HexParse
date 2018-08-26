@@ -38,7 +38,7 @@ void simulate(uint8_t *codePtr)
       printf("\n");
     } else {
       incr = simulateOneInstruction(codePtr);
-      if(is2wordInstruction(codePtr - 2)) {
+      if(is2wordInstruction(codePtr)) {
         printf("0x%08x(0x%08x)\t\t\t0x%08x\t(step=%d)\n",getPc(codePtr), getPc(codePtr)/2,*(uint32_t*)codePtr, i);
         printf("R0 =0x%02x R1 =0x%02x R2 =0x%02x R3 =0x%02x R4 =0x%02x "
                "R5 =0x%02x R6 =0x%02x R7 =0x%02x R8 =0x%02x R9 =0x%02x \n",
