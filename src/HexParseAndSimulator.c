@@ -24,12 +24,18 @@ void simulate(uint8_t *codePtr)
   int incr;
   char ch;
 
-  printf("Press any key to step. Press 'd' to dump SRARM content. Press ESC key to break.\n");
+  printf("Press any key to step. Press 'd' to dump the whole SRAM content.\n"
+         "Press 0...8 key to dump selective portion of the SRAM content.\n"
+         "Press ESC key to break.\n");
   while(1) {
     if((ch = getch()) == ESC) {
       break;
     } else if(ch == 'd' || ch == 'D') {
-      dumpSram();
+      dumpSram(0, 0x900);
+      printf("\n");
+    } else if(ch >= '0' && ch <= '8') {
+      dumpSram((int)(ch - '0') << 8, 0x100);
+      printf("\n");
     } else {
       incr = simulateOneInstruction(codePtr);
       if(is2wordInstruction(codePtr - 2)) {
