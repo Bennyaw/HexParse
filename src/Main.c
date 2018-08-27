@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
 
   Try{
     simulate(flashMemory);
+    dumpSram(0, 0x900);
   } Catch(e){
-    dumpSram();
+    dumpSram(0, 0x900);
   }
-  dumpSram();
   printf("done.\n");
 }
