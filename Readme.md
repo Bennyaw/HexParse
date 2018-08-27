@@ -3,7 +3,11 @@ Hex Parser and AVR8 Simulator
 
 Hex Parser
 ----------
-!!!!Explain what your project is all about!!!!
+This Hex Parse is design according the Intel Hex format.
+We will need a IDE simulator to run a program code in order to generate a hex file. Then we can save the data byte using the HexParse program. The data bytes
+will save into a flash memory, which is an large array in the program. The AVR8 simulator will use the data inside flash memory to simulate instruction.
+This Hex Parser can still work if there is 20 bit addressing mode (record type 02) or 32 bit addressing mode (record type 04) in a single Hex file.
+
 
 AVR8 Simulator
 --------------
@@ -30,9 +34,8 @@ ceedling                    # Build the AvrSimulator
 
 Requirements
 ------------
-!!!!Explain what software and packages are needed to build the projects!!!!
-
-!!! software: ruby, mingw64/32, git; package: ceedling !!!
+software: ruby, mingw64/32, git; package: ceedling,
+IDE simulator: Atmel Studio 7.0
 
 
 Running The Simulator

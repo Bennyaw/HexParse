@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     hexParse(hexLineRead,flashMemory);
   }
 
-  initialiseSram();
+  initSimulator();
 
   Try{
     simulate(flashMemory);
