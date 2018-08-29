@@ -24,6 +24,8 @@ void simulate(uint8_t *codePtr)
   int incr;
   char ch;
 
+  initSimulator();
+  
   printf("Press any key to step. Press 'd' to dump the whole SRAM content.\n"
          "Press 0...8 key to dump selective portion of the SRAM content.\n"
          "Press ESC key to break.\n");
