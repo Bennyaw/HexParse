@@ -1,7 +1,6 @@
 #ifndef _EXCEPTION_H
 #define _EXCEPTION_H
 
-
 typedef struct Exception Exception; //for c++ and c
 struct Exception
 {

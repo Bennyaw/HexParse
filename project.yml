@@ -55,6 +55,9 @@
   :source:
     - CEXCEPTION_USE_CONFIG_FILE
     - _ISOC99_SOURCE
+  :release:
+    - CEXCEPTION_USE_CONFIG_FILE
+    - _ISOC99_SOURCE
 
 :cmock:
   :mock_prefix: mock_
