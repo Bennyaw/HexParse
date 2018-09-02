@@ -34,23 +34,24 @@ int main(int argc, char *argv[])
     exit(-1);
   }
 
-  fp = fopen(argv[1],"r");
-  if(fp == NULL){
+  fp = fopen(argv[1], "r");
+  if(fp == NULL) {
     perror("Error opening file.");
     exit(-1);
   }
 
-  while((hexLineRead = readFile(fp)) != NULL)
-  {
+  // Load Intel hex file into the simulator flash memory
+  while((hexLineRead = readFile(fp)) != NULL) {
     hexParse(hexLineRead,flashMemory);
   }
 
-  initSimulator();
-
-  Try{
+  Try {
     simulate(flashMemory);
     dumpSram(0, 0x900);
   } Catch(e){
+    printf("\nDumping CPU info:\n");
+    dumpRegisters();
+    printf("Dumping SRAM:\n");
     dumpSram(0, 0x900);
   }
   printf("done.\n");

@@ -1,45 +1,45 @@
 ;
 ; BubbleSort.asm
 ;
-; Created: 21/8/2018 10:57:12 PM
-; Author : Benny Aw
-;
-
+; Created:  21/8/2018 10:57:12 PM
+; Author:   Benny Aw
+; Modified: Poh Tze Ven
 
 ;**** A P P L I C A T I O N   N O T E   A V R 2 2 0 ************************
 ;*
-;* Title:		Bubble Sort Algorithm
-;* Version:		1.0
-;* Last updated:	97.07.04
-;* Target:		AT90Sxx1x (Devices with SRAM)
+;* Title:           Bubble Sort Algorithm
+;* Version:         1.0
+;* Last updated:    97.07.04
+;* Target:          AT90Sxx1x (Devices with SRAM)
 ;*
-;* Support E-mail:	avr@atmel.com
+;* Support E-mail:  avr@atmel.com
 ;*
 ;* DESCRIPTION
-;* This Application note shows how to sort a block of data in SRAM using	
+;* This Application ote shows how to sort a block of data in SRAM using
 ;* the code efficient Bubble Sort Algorithm. The App. note contains a test
-;* program which copies a 60-byte block of data from program memory to 
-;* SRAM and sorts the data.
+;* program which copies a 60-byte block of data from program memory to
+;* SRAM and sorts the data.
 ;*
 ;***************************************************************************
 
 .include "m324pdef.inc"
 
-.equ	SIZE	= 4			;data block size
-.equ	TABLE_L	=$60		;Low SRAM address of first data element
-.equ	TABLE_H	=$02		;High SRAM address of first data element
+.equ  SIZE    = 60            ;data block size
+.equ  DATA    = $260
+.equ  TABLE_L = low(DATA)     ;Low SRAM address of first data element
+.equ  TABLE_H = high(DATA)    ;High SRAM address of first data element
 
-	rjmp	RESET			;Reset Handle
+	rjmp	reset			;Reset Handle
 
 ;***************************************************************************
 ;*
 ;* "bubble"
 ;*
 ;* This subroutine bubble sorts the number of bytes found in "cnt1" + 1
-;* with the last element in SRAM at location "last". 
-;* This implementation sorts the data with the highest element at the 
-;* lowest SRAM address. The sort order can be reversed by changing the 
-;* "brlo" statement to "brsh". Signed sort can be obtained by using "brlt" 
+;* with the last element in SRAM at location "last".
+;* This implementation sorts the data with the highest element at the
+;* lowest SRAM address. The sort order can be reversed by changing the
+;* "brlo" statement to "brsh". Signed sort can be obtained by using "brlt"
 ;* or "brge"
 ;*
 ;* Number of words	:13 + return
@@ -53,38 +53,39 @@
 
 ;***** Subroutine Register Variables
 
-.def	A	=r13		;first value to be compared
-.def	B	=r14		;second value to be compared
-.def	cnt2	=r15		;inner loop counter
-.def	cnt1	=r16		;outer loop counter
-.def	endL	=r17		;end of data array low address
-.def	endH	=r18		;end of data array high address
+.def  A     = r13   ;first value to be compared
+.def  B     = r14   ;second value to be compared
+.def  cnt2  = r15   ;inner loop counter
+.def  cnt1  = r16   ;outer loop counter
+.def  endL  = r17   ;end of data array low address
+.def  endH  = r18   ;end of data array high address
 
 ;***** Code
 
 bubble:
-	mov		ZL,endL
-	mov		ZH,endH		;init Z pointer
-	mov		cnt2,cnt1	;counter2 <- counter1
-i_loop:	
-	ld		A,Z			;get first byte, A (n)
-	ld		B,-Z		;decrement Z and get second byte, B (n-1)
-	cp		A,B			;compare A with B
-	brlo	L1			;if A not lower 
-	st		Z,A			;    store swapped
-	std		Z+1,B
-L1:	dec		cnt2
-	brne	i_loop		;end inner loop
-	dec		cnt1
-	brne	bubble		;end outer loop		
-	ret
+  mov   ZL,endL
+  mov   ZH,endH     ;init Z pointer
+  mov   cnt2,cnt1   ;counter2 <- counter1
+i_loop:
+  ld    A, Z        ;get first byte, A (n)
+  ld    B, -Z       ;decrement Z and get second byte, B (n-1)
+  cp    A, B        ;compare A with B
+  brlo  L1          ;if A not lower
+  st    Z, A        ;    store swapped
+  std   Z+1, B
+L1:
+  dec   cnt2
+  brne  i_loop		;end inner loop
+  dec   cnt1
+  brne  bubble		;end outer loop
+  ret
 
 
 ;***************************************************************************
 ;*
 ;* Test Program
 ;*
-;* This program copies 60 bytes of data from Program memory to SRAM. It 
+;* This program copies 60 bytes of data from Program memory to SRAM. It
 ;* then calls "bubble" to get the data sorted.
 ;*
 ;***************************************************************************
@@ -93,42 +94,46 @@ RESET:
 
 ;***** Main program Register variables
 
-.def	temp	=r16
+.def  temp  = r16
 
 ;***** Code
-	ldi		temp,low(RAMEND)
-	out		SPL,temp
-	ldi		temp,high(RAMEND)
-	out		SPH,temp			;init Stack Pointer
+  ldi   temp, low(RAMEND)
+  out   SPL,  temp
+  ldi   temp, high(RAMEND)
+  out   SPH,  temp      ;init Stack Pointer
 
 ;***** Memory fill
-	
-	clr		ZH
-	ldi		ZL,tableend*2+1		;Z-pointer <- ROM table end + 1
-	ldi		YL,low(256*TABLE_H+TABLE_L+SIZE)
-	ldi		YH,high(256*TABLE_H+TABLE_L+SIZE)	
-								;Y pointer <- SRAM table end + 1
-loop:	
-	lpm							;get ROM constant
-	st		-Y,r0				;store in SRAM and decrement Y-pointer
-	sbiw	ZL,1				;decrement Z-pointer
-	cpi		YL,TABLE_L			;if not done
-	brne	loop				;    loop more
-	cpi		YH,TABLE_H
-	brne	loop
+  ;Z-pointer <- ROM table end + 1
+  ldi   ZH, high(tableend)*2
+  ldi   ZL, low(tableend)*2+1
+  ;Y pointer <- SRAM table end + 1
+  ldi   YL, low(256*TABLE_H+TABLE_L+SIZE)
+  ldi   YH, high(256*TABLE_H+TABLE_L+SIZE)
+
+loop:
+  lpm                   ;get ROM constant
+  st    -Y, r0          ;store in SRAM and decrement Y-pointer
+  sbiw  ZL, 1           ;decrement Z-pointer
+  cpi   YL, TABLE_L     ;if not done
+  brne  loop            ;    loop more
+  cpi   YH, TABLE_H
+  brne  loop
+  jmp   sort
+
 
 ;***** Sort data
 
-sort:	
-	ldi		endL,low(TABLE_H*256+TABLE_L+SIZE-1)
-	ldi		endH,high(TABLE_H*256+TABLE_L+SIZE-1)
-								;Z <- end of array address
-	ldi		cnt1,SIZE-1			;cnt1 <- size of array - 1
-	rcall	bubble
+.ORG	$600
+sort:
+  ;Z <- end of array address
+  ldi   endL,low(TABLE_H*256+TABLE_L+SIZE-1)
+  ldi   endH,high(TABLE_H*256+TABLE_L+SIZE-1)
+  ldi   cnt1,SIZE-1     ;cnt1 <- size of array - 1
+  rcall	bubble
 
-	break
+  break                 ;trigger debug breakpoint
 forever:
-	rjmp	forever
+  rjmp	forever
 
 
 ;***** 60 ROM Constants
@@ -165,4 +170,3 @@ table:
 .db	44,231
 tableend:
 .db	76,48
-
