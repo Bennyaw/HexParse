@@ -40,19 +40,22 @@ int main(int argc, char *argv[])
     exit(-1);
   }
 
-  // Load Intel hex file into the simulator flash memory
-  while((hexLineRead = readFile(fp)) != NULL) {
-    hexParse(hexLineRead,flashMemory);
-  }
-
   Try {
-    simulate(flashMemory);
-    dumpSram(0, 0x900);
-  } Catch(e){
-    printf("\nDumping CPU info:\n");
-    dumpRegisters();
-    printf("Dumping SRAM:\n");
-    dumpSram(0, 0x900);
+    // Load Intel hex file into the simulator flash memory
+    while((hexLineRead = readFile(fp)) != NULL) {
+      hexParse(hexLineRead,flashMemory);
+    }
+    Try {
+      simulate(flashMemory);
+      dumpSram(0, 0x900);
+    } Catch(e) {
+      printf("\nDumping CPU info:\n");
+      dumpRegisters();
+      printf("Dumping SRAM:\n");
+      dumpSram(0, 0x900);
+    }
+    printf("done.\n");
+  } Catch(e) {
+    printf("Error %d: %s\n", e->errorCode, e->errorMsg);
   }
-  printf("done.\n");
 }
