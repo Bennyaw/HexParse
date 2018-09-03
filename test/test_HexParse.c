@@ -211,7 +211,7 @@ void test_hexParse_read_assemblerApp_related_to_segmentAddress_file_and_return_t
      0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
      0x6E, 0x20
    };
-  uint8_t *verifyData;
+
   FILE *fp;
   char *hexLineRead;
   fp = fopen("data/test/assemblerAppSeg.hex","r");
@@ -378,7 +378,7 @@ void test_verifyHexLine_without_colon_and_throw_ERR_COLON_MISSING(void)
 
   Try{
     verifyHexLine(&line);
-    TEST_FAIL_MESSAGE("Expect ERR_UNKNOWN_DATA. But no exception thrown.");
+    TEST_FAIL_MESSAGE("Expect ERR_COLON_MISSING. But no exception thrown.");
   }
   Catch(e){
     printf(e->errorMsg);
@@ -502,14 +502,11 @@ void test_readFile_read_3rd_hex_line_from_hex_file_and_throw_ERR_COLON_MISSING(v
 
 }
 
-void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
+void test_readFile_read_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_TYPE(void)
 {
   /*--------------testErrorRecordType.hex----------------
-   *:10C00000576F77212044696420796F7520726561CC
-   *:10C010066C6C7920676F207468726F756768206131
-   *:10C020006C6C20746869732074726F75626C652023
    *:10C03000746F207265616420746869732073747210
-   *:04C040007696E673FF
+   *:020000100000EE
    *:00000001FF
    */
   CEXCEPTION_T e;
@@ -522,11 +519,10 @@ void test_readFile_read_2rd_hex_line_from_hex_file_and_throw_ERR_UNKNOWN_RECORD_
     perror("Error opening file");
   }
   Try{
-    for(i= 0; i < 2;i++)
+    while((hexLineRead = readFile(fp)) != NULL)
     {
-      hexLineRead = readFile(fp);
+      hexParse(hexLineRead,flashMemory);
     }
-    hexParse(hexLineRead,flashMemory);
     TEST_FAIL_MESSAGE("Expect ERR_UNKNOWN_RECORD_TYPE. But no exception thrown.");
   }
   Catch(e)
@@ -598,6 +594,88 @@ void test_readFile_read_not_not_equal_number_data_and_throw_ERR_NUMBER_OF_DATA_M
   {
     printf(e->errorMsg);
     TEST_ASSERT_EQUAL(ERR_NUMBER_OF_DATA_MISMATCHED, e->errorCode);
+    freeError(e);
+  }
+
+}
+
+void test_loadHexFile_read_hex_file_and_load_data_into_memory(void)
+{
+  uint8_t expectedData[] = {
+    0x54, 0x68, 0x69, 0x73, 0x20, 0x70, 0x61,
+    0x72, 0x74, 0x20, 0x69, 0x73, 0x20, 0x69,
+    0x6E, 0x20
+  };
+
+  CEXCEPTION_T e;
+  char *fileNameDirectory = "data/test/assemblerAppSeg.hex";
+
+  loadHexFile(fileNameDirectory,flashMemory,256*k);
+  TEST_ASSERT_EQUAL_MEMORY(expectedData,&flashMemory[0x2CE34],16);
+
+}
+
+void test_loadHexFile_read_testNumberOfData_hex_file_and_throw_ERR_NUMBER_OF_DATA_MISMATCHED(void)
+{
+  CEXCEPTION_T e;
+  char *fileNameDirectory = "data/test/testNumberOfData.hex";
+
+  Try{
+    loadHexFile(fileNameDirectory,flashMemory,256*k);
+    TEST_FAIL_MESSAGE("Expect ERR_NUMBER_OF_DATA_MISMATCHED. But no exception thrown.");
+  }
+  Catch(e){
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_NUMBER_OF_DATA_MISMATCHED, e->errorCode);
+    freeError(e);
+  }
+}
+
+void test_loadHexFile_read_testInvalidInstructionAfterEOF_hex_file_and_throw_ERR_INVALID_INSTRUCTION_AFTER_EOF(void)
+{
+  CEXCEPTION_T e;
+  char *fileNameDirectory = "data/test/testErrorInvalidInstructionAfterEOF.hex";
+
+  Try{
+    loadHexFile(fileNameDirectory,flashMemory,256*k);
+    TEST_FAIL_MESSAGE("Expect ERR_INVALID_INSTRUCTION_AFTER_EOF. But no exception thrown.");
+  }
+  Catch(e){
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_INVALID_INSTRUCTION_AFTER_EOF, e->errorCode);
+    freeError(e);
+  }
+}
+
+void test_loadHexFile_read_testInvalidInstructionAfterEOF_hex_file_and_throw_ERR_MISSING_EOF(void)
+{
+  CEXCEPTION_T e;
+  char *fileNameDirectory = "data/test/testMissingEOF.hex";
+
+  Try{
+    loadHexFile(fileNameDirectory,flashMemory,256*k);
+    TEST_FAIL_MESSAGE("Expect ERR_MISSING_EOF. But no exception thrown.");
+  }
+  Catch(e){
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_MISSING_EOF, e->errorCode);
+    freeError(e);
+  }
+
+}
+
+void test_loadHexFile_bufferSize_given_too_small_and_throw_ERR_BUFFER_SIZE(void)
+{
+  CEXCEPTION_T e;
+  char *fileNameDirectory = "data/test/assemblerAppSeg.hex";
+
+  Try{
+    loadHexFile(fileNameDirectory,flashMemory,4*k);
+    TEST_FAIL_MESSAGE("Expect ERR_BUFFER_SIZE. But no exception thrown.");
+  }
+  Catch(e){
+    printf(e->errorMsg);
+    TEST_ASSERT_EQUAL(ERR_BUFFER_SIZE, e->errorCode);
     freeError(e);
   }
 

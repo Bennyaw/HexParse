@@ -18,7 +18,9 @@ uint32_t start32BitAddress;
 int enableSegmentAddress = 0;
 int enableLinearAddress = 0;
 int endOfLineFlag = 0;
-
+int lineNumber = 0;
+int columnNumber = 0;
+int bufferSize;
 /*    all printf is to debug code, for checing purpose  */
 /* -----------------------RECORD TYPE---------------------
 *   00 - data
@@ -84,6 +86,9 @@ char *readFile(FILE *fileLocation)
 void initHexParser(void)//for initialisation
 {
   endOfLineFlag = 0;
+  lineNumber = 1;
+  columnNumber = 0;
+  bufferSize = 256*k;
 }
 
 int checkColon(char **linePtr)
@@ -95,7 +100,7 @@ int checkColon(char **linePtr)
   }
   else
   {
-    throwSimpleError(ERR_COLON_MISSING,"Error : ':' is missing");
+    throwError(ERR_COLON_MISSING,"Error 0: ':' is missing at line %d:%d",lineNumber,columnNumber);
     return 0;
   }
 }
@@ -159,6 +164,11 @@ int extractRecordType(char **linePtr)
   int intRecordType = 0;
   int errorFlag = 0;
 
+  if(**linePtr != '0')//check if is in 0-5
+  {
+    errorFlag = 1;
+  }
+
   while(count<2){
 
     if(**linePtr <'0' || **linePtr >'5')//check if is in 0-5
@@ -174,7 +184,7 @@ int extractRecordType(char **linePtr)
 
   if(errorFlag == 1)
   {
-    throwError(ERR_UNKNOWN_RECORD_TYPE,"Error : Unknown recordtype digit '%x' found in the line.",intRecordType);
+    throwError(ERR_UNKNOWN_RECORD_TYPE,"Error 3: Unknown recordtype digit '%x' found in the line %d:%d.",intRecordType,lineNumber,columnNumber);
   }
   else
   {
@@ -205,7 +215,7 @@ int verifyHexLine(char **linePtr)
     }
     else
     {
-      throwError(ERR_DATA_CORRUPTED,"Error : Data corrupted by %d in decimal",verifyData);
+      throwError(ERR_DATA_CORRUPTED,"Error 1: Data corrupted by %d in decimal in line %d",verifyData,lineNumber);
       return 0;
     }
 
@@ -225,16 +235,18 @@ int convertHexToDec(char **linePtr, int decimal, int p, int base)
   {
     decimal = decimal + (**linePtr - 48)*base;
     (*linePtr)++; //move to next digit
+    columnNumber++;
   }
   else if((toupper(**linePtr)) >= 'A' && (toupper(**linePtr)) <= 'F')//convert to int from hex
   {
     decimal = decimal + (toupper(**linePtr) - 55)*base;
     (*linePtr)++; //move to next hexdigit
+    columnNumber++;
   }
   else
   {
     //printf("errorChar : %c\n", **linePtr);
-    throwError(ERR_UNKNOWN_DATA,"Error : Unknown data '%c' found in the line.",**linePtr);
+    throwError(ERR_UNKNOWN_DATA,"Error 2: Unknown data '%c' found in line %d:%d.",**linePtr,lineNumber,columnNumber+1);
   }
 
   return decimal;
@@ -246,7 +258,7 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
   if(endOfLineFlag == 1)//throw error
   {
     endOfLineFlag = 0;//reset flag
-    throwError(ERR_INVALID_INSTRUCTION_AFTER_EOF,"Error : Invalid instruction after end of file.");
+    throwError(ERR_INVALID_INSTRUCTION_AFTER_EOF,"Error 4: Invalid instruction after end of file at line %d.",lineNumber);
   }
   else
   {
@@ -266,6 +278,7 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
     {
       linePtr++;//move pointer to address field
     }
+    columnNumber = 0;//reset to 0 for next line
 
     HexRecordStructure.byteCount = getByteCount(&linePtr);//error thrown in the function
     HexRecordStructure.address = extractAddress(&linePtr);//error thrown in the function
@@ -317,8 +330,10 @@ void hexParse(char *linePtr, uint8_t *flashMemory)
 
 	if(*linePtr != '\0')
 	{
-		throwError(ERR_NUMBER_OF_DATA_MISMATCHED,"Error : Expected number of data bytes mismatch with actual number of bytes.");
+		throwError(ERR_NUMBER_OF_DATA_MISMATCHED,"Error 5: Expected number of data bytes mismatch with actual number of bytes at line %d.",lineNumber);
 	}
+
+  lineNumber++;
 }
 
 void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flashMemory)
@@ -341,6 +356,10 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flas
       count++;
     }
 
+    if((segmentAddress + HexRecordStructure.address) > bufferSize || (linearAddress + HexRecordStructure.address) > bufferSize || HexRecordStructure.address > bufferSize)
+    {
+      throwError(ERR_BUFFER_SIZE,"Error 7: Data address is out of range of flashMemory at line %d:%d.",lineNumber,columnNumber);
+    }
 
     if(enableSegmentAddress == 1)
     {
@@ -366,4 +385,25 @@ void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flas
   }
 
 
+}
+
+void loadHexFile(char *fileName, uint8_t *buffer, int maxBufferSize)
+{
+  FILE *fp;
+  char *hexLineRead;
+  fp = fopen(fileName,"r");
+  bufferSize = maxBufferSize;
+  if(fp == NULL){
+    perror("Error opening file");
+  }
+
+  while((hexLineRead = readFile(fp)) != NULL)
+  {
+    hexParse(hexLineRead,buffer);
+  }
+
+  if(endOfLineFlag == 0)
+  {
+    throwError(ERR_MISSING_EOF,"Error 6: End of file hex line is missing.");
+  }
 }

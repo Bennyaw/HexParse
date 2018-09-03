@@ -22,5 +22,5 @@ int verifyHexLine(char **linePtr);
 int convertHexToDec(char **linePtr, int decimal, int p, int base);
 void hexParse(char *linePtr,uint8_t *flashMemory);
 void loadData(char *linePtr,HexRecordStructure HexRecordStructure, uint8_t *flashMemory);
-
+void loadHexFile(char *fileName, uint8_t *buffer, int maxBufferSize);
 #endif // _HEXPARSE_H
